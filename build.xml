@@ -10,11 +10,7 @@
 <project name="Office" default="default" basedir=".">
     <description>Builds, tests, and runs the project Office.</description>
     <import file="nbproject/build-impl.xml"/>
-    <dependency>
-    <groupId>org.apache.poi</groupId>
-    <artifactId>poi</artifactId>
-    <version>3.9</version>
-</dependency>
+
     <!--
     
     There exist several targets which are by default empty and which can be 

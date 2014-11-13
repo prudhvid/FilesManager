@@ -61,4 +61,22 @@ public class Search {
         return retList;
         
     }
+    public static List<HardCopy> getByDates(Date inDate,Date outDate)
+    {
+        List<HardCopy> retList = new LinkedList<>();
+        for (HardCopy hardCopy : fileList) {
+            try {
+                Date d1=hardCopy.getIndate(),d2=hardCopy.getOutdate();
+                if(d1.compareTo(d2)<0){
+                    retList.add(hardCopy);
+                }
+            } catch (Exception e) {
+            }
+            
+            
+        }
+        return retList;
+        
+    }
+    
 }

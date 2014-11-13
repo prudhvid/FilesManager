@@ -6,8 +6,15 @@
 
 package FilesManager;
 
-import java.nio.file.Files;
+import java.awt.Component;
+import java.util.Date;
 import java.util.List;
+import javax.swing.JTable;
+import javax.swing.JTextArea;
+import javax.swing.UIManager;
+import javax.swing.border.EmptyBorder;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableModel;
 
 /**
  *
@@ -16,12 +23,13 @@ import java.util.List;
 public class FileSearchForm extends javax.swing.JFrame {
     FileNoComboSuggest fileComboHelp;
     SubjComboSuggest subSearchHelp;
+    TableModel tableModel;
     /**
      * Creates new form FileSearchForm
      */
     public FileSearchForm() {
         initComponents();
-        
+        tableModel=resultsTable.getModel();
         fileSearchBox.setEditable(true);
         fileComboHelp=new FileNoComboSuggest(fileSearchBox);
         fileSearchBox.setModel(fileComboHelp);
@@ -31,6 +39,8 @@ public class FileSearchForm extends javax.swing.JFrame {
         subSearchHelp=new SubjComboSuggest(subSearchBox);
         subSearchBox.setModel(subSearchHelp);
         subSearchBox.addItemListener(subSearchHelp);
+        resultsTable.setRowHeight(160);
+        resultsTable.setDefaultRenderer(String.class, new MultiLineCellRenderer());
     }
 
     /**
@@ -43,16 +53,16 @@ public class FileSearchForm extends javax.swing.JFrame {
     private void initComponents() {
 
         fileSearchBox = new javax.swing.JComboBox();
-        jTextField1 = new javax.swing.JTextField();
-        inDateBox = new com.toedter.calendar.JCalendar();
-        outDateBox = new com.toedter.calendar.JCalendar();
         subSearchBox = new javax.swing.JComboBox();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jTextArea1 = new javax.swing.JTextArea();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        resultsTable = new javax.swing.JTable();
+        outDateChoose = new com.toedter.calendar.JDateChooser();
+        inDateChoose = new com.toedter.calendar.JDateChooser();
+        searchButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -63,8 +73,6 @@ public class FileSearchForm extends javax.swing.JFrame {
                 fileSearchBoxActionPerformed(evt);
             }
         });
-
-        jTextField1.setText("jTextField1");
 
         subSearchBox.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
         subSearchBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
@@ -86,79 +94,132 @@ public class FileSearchForm extends javax.swing.JFrame {
         jLabel4.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
         jLabel4.setText("Outward Date");
 
-        jTextArea1.setColumns(20);
-        jTextArea1.setRows(5);
-        jScrollPane1.setViewportView(jTextArea1);
+        resultsTable.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        resultsTable.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null}
+            },
+            new String [] {
+                "S.No", "Inward Date", "File No", "Subject", "Outward Date", "DispacthedTo"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+            };
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false, false, false
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        jScrollPane2.setViewportView(resultsTable);
+        if (resultsTable.getColumnModel().getColumnCount() > 0) {
+            resultsTable.getColumnModel().getColumn(0).setResizable(false);
+            resultsTable.getColumnModel().getColumn(1).setResizable(false);
+            resultsTable.getColumnModel().getColumn(2).setResizable(false);
+            resultsTable.getColumnModel().getColumn(3).setResizable(false);
+            resultsTable.getColumnModel().getColumn(4).setResizable(false);
+            resultsTable.getColumnModel().getColumn(5).setResizable(false);
+        }
+
+        inDateChoose.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                inDateChoosePropertyChange(evt);
+            }
+        });
+
+        searchButton.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        searchButton.setText("Search");
+        searchButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                searchButtonActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
+                        .addGap(106, 106, 106)
                         .addComponent(jLabel1)
                         .addGap(16, 16, 16)
                         .addComponent(fileSearchBox, javax.swing.GroupLayout.PREFERRED_SIZE, 282, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(58, 58, 58)
-                        .addComponent(jLabel2))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(42, 42, 42)
-                        .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(26, 26, 26)
-                        .addComponent(inDateBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 18, Short.MAX_VALUE)
+                        .addGap(82, 82, 82)
+                        .addComponent(jLabel2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(subSearchBox, javax.swing.GroupLayout.PREFERRED_SIZE, 356, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap(129, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(6, 6, 6)
-                        .addComponent(jLabel4)
-                        .addGap(29, 29, 29)
-                        .addComponent(outDateBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel4)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(outDateChoose, javax.swing.GroupLayout.DEFAULT_SIZE, 177, Short.MAX_VALUE)
+                    .addComponent(inDateChoose, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(171, 171, 171))
             .addGroup(layout.createSequentialGroup()
-                .addGap(54, 54, 54)
-                .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 193, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(113, 113, 113)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(198, 198, 198)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 1231, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(119, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(searchButton, javax.swing.GroupLayout.PREFERRED_SIZE, 134, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(277, 277, 277))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
+                        .addGap(88, 88, 88)
+                        .addComponent(inDateChoose, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(30, 30, 30))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGap(79, 79, 79)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(subSearchBox, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(jLabel2))
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(fileSearchBox, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(jLabel1)))
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(51, 51, 51)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(outDateBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(inDateBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(85, 85, 85)
-                                .addComponent(jLabel3))))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(210, 210, 210)
-                        .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 89, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(fileSearchBox, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel1)
+                            .addComponent(subSearchBox, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel2)
+                            .addComponent(jLabel3))
+                        .addGap(21, 21, 21)))
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(99, 99, 99))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(70, 70, 70))))
+                    .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(outDateChoose, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(30, 30, 30)
+                .addComponent(searchButton)
+                .addGap(28, 28, 28)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(111, 111, 111))
         );
 
         pack();
@@ -166,23 +227,38 @@ public class FileSearchForm extends javax.swing.JFrame {
 
     private void fileSearchBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fileSearchBoxActionPerformed
         try {
-            int i=fileSearchBox.getSelectedIndex();
-        jTextArea1.setText(fileComboHelp.database.get(i).subject);
-        jTextField1.setText(String.valueOf(fileComboHelp.database.get(i).sno));
+            List<HardCopy> l=fileComboHelp.database;
+            updatetable(l);
+            
         } catch (Exception e) {
+            e.printStackTrace();;
         }
-        
         
     }//GEN-LAST:event_fileSearchBoxActionPerformed
 
     private void subSearchBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_subSearchBoxActionPerformed
        try {
-            int i=subSearchBox.getSelectedIndex();
-        jTextArea1.setText(subSearchHelp.database.get(i).subject);
-        jTextField1.setText(String.valueOf(subSearchHelp.database.get(i).sno));
+           List<HardCopy> l=subSearchHelp.database;
+           updatetable(l);
         } catch (Exception e) {
         }
     }//GEN-LAST:event_subSearchBoxActionPerformed
+
+    private void inDateChoosePropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_inDateChoosePropertyChange
+        // TODO add your handling code here:
+        
+    }//GEN-LAST:event_inDateChoosePropertyChange
+
+    private void searchButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchButtonActionPerformed
+        // TODO add your handling code here:
+        try {
+            Date d1=inDateChoose.getDate();
+            Date d2=outDateChoose.getDate();
+            List<HardCopy> l=Search.getByDates(d1, d2);
+            updatetable(l);
+        } catch (Exception e) {
+        }
+    }//GEN-LAST:event_searchButtonActionPerformed
 
     /**
      * @param args the command line arguments
@@ -221,18 +297,106 @@ public class FileSearchForm extends javax.swing.JFrame {
         });
         
     }
+    private void updateRowHeights()
+    {
+        try
+        {
+            for (int row = 0; row < resultsTable.getRowCount(); row++)
+            {
+                int rowHeight = resultsTable.getRowHeight();
+                int column=3;
+                Component comp = resultsTable.prepareRenderer(resultsTable.getCellRenderer(row, column), row, column);
+                rowHeight = Math.max(rowHeight, comp.getPreferredSize().height);
+                resultsTable.setRowHeight(row, rowHeight);
+            }
+        }
+        catch(ClassCastException e) {}
+    }
+    private void updatetable(List<HardCopy> l)
+    {
+        int index=0;
+            for (HardCopy hardCopy : l) {
+                if(index>=20)
+                    break;
+                tableModel.setValueAt(index+1, index, 0);
+                tableModel.setValueAt(hardCopy.inDate.toLocaleString().replaceAll("..:..:..: ..", ""), index, 1);
+                tableModel.setValueAt(hardCopy.fileNo, index, 2);
+                if(hardCopy.subject!=null)
+                {
+                    String s=hardCopy.subject;
+                    StringBuilder sb = new StringBuilder(s);
 
+                    int i = 0;
+                    while ((i = sb.indexOf(" ", i + 30)) != -1) {
+                        sb.replace(i, i + 1, "\n");
+                    }
+                    tableModel.setValueAt(sb.toString(), index, 3);
+                    
+                }
+                if(hardCopy.outDate!=null)
+                    tableModel.setValueAt(hardCopy.outDate.toLocaleString(), index, 4);
+                if(hardCopy.dispatchedTo!=null)
+                    tableModel.setValueAt(hardCopy.dispatchedTo, index, 5);
+                index++;
+            }
+            for (int j = index; j < 20; j++) {
+                for (int k = 0; k < 6; k++) {
+                    tableModel.setValueAt("", j, k);
+                }
+            }
+    }
+    
+    
+    
+    
+    
+    
+    
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox fileSearchBox;
-    private com.toedter.calendar.JCalendar inDateBox;
+    private com.toedter.calendar.JDateChooser inDateChoose;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTextArea jTextArea1;
-    private javax.swing.JTextField jTextField1;
-    private com.toedter.calendar.JCalendar outDateBox;
+    private javax.swing.JScrollPane jScrollPane2;
+    private com.toedter.calendar.JDateChooser outDateChoose;
+    private javax.swing.JTable resultsTable;
+    private javax.swing.JButton searchButton;
     private javax.swing.JComboBox subSearchBox;
     // End of variables declaration//GEN-END:variables
 }
+class MultiLineCellRenderer extends JTextArea implements TableCellRenderer {
+
+  public MultiLineCellRenderer() {
+    setLineWrap(true);
+    setWrapStyleWord(true);
+    setOpaque(true);
+  }
+
+  public Component getTableCellRendererComponent(JTable table, Object value,
+      boolean isSelected, boolean hasFocus, int row, int column) {
+    if (isSelected) {
+      setForeground(table.getSelectionForeground());
+      setBackground(table.getSelectionBackground());
+    } else {
+      setForeground(table.getForeground());
+      setBackground(table.getBackground());
+    }
+    setFont(table.getFont());
+    if (hasFocus) {
+      setBorder(UIManager.getBorder("Table.focusCellHighlightBorder"));
+      if (table.isCellEditable(row, column)) {
+        setForeground(UIManager.getColor("Table.focusCellForeground"));
+        setBackground(UIManager.getColor("Table.focusCellBackground"));
+      }
+    } else {
+      setBorder(new EmptyBorder(1, 2, 1, 2));
+    }
+    setText((value == null) ? "" : value.toString());
+    return this;
+  }
+  
+}
+
+
