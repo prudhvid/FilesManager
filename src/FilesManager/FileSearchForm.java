@@ -9,11 +9,15 @@ package FilesManager;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.FlowLayout;
+import java.awt.GraphicsEnvironment;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.util.Date;
 import java.util.List;
+import java.util.prefs.Preferences;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -24,6 +28,7 @@ import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
 /**
@@ -34,48 +39,90 @@ public class FileSearchForm extends javax.swing.JFrame {
     FileNoComboSuggest fileComboHelp;
     SubjComboSuggest subSearchHelp;
     TableModel tableModel;
+    
     /**
      * Creates new form FileSearchForm
      */
     public FileSearchForm() {
         initComponents();
         
-        /*
-        File choosing
-        */
         
-        JFileChooser chooser = new JFileChooser();
-        chooser.setMultiSelectionEnabled(false);
-        FileNameExtensionFilter filter = new FileNameExtensionFilter(
-        "Excel files", "xls", "xlsx");
-        chooser.setFileFilter(filter);
-        int option = chooser.showOpenDialog(FileSearchForm.this);
         
-        if(option==JFileChooser.APPROVE_OPTION){
-            
-            File f=chooser.getSelectedFile();
-            System.out.println(f.getName());
-            List<HardCopy> list=ExcelParser.readExcelData(f.getAbsolutePath());
-            Search.fileList=list;
+        GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        this.setExtendedState(this.getExtendedState() | this.MAXIMIZED_BOTH);
+        
+        
+        List<HardCopy> listTemp=null;
+        StoredPath sp=new StoredPath();
+        if(sp.isPathPres()){
+            System.out.println(sp.getPath());
+             listTemp=ExcelParser.readExcelData(sp.getPath());
+            Search.fileList=listTemp;
         }
-        else if(option==JFileChooser.CANCEL_OPTION){
-            setVisible(false);
-            dispose();
-            System.exit(0);
+        else{
+            JFileChooser chooser = new JFileChooser();
+            chooser.setMultiSelectionEnabled(false);
+            FileNameExtensionFilter filter = new FileNameExtensionFilter(
+            "Excel files", "xls", "xlsx");
+            chooser.setFileFilter(filter);
+            int option = chooser.showOpenDialog(FileSearchForm.this);
+
+            if(option==JFileChooser.APPROVE_OPTION){
+                File f=chooser.getSelectedFile();
+                System.out.println(f.getName());
+                listTemp=ExcelParser.readExcelData(f.getAbsolutePath());
+                Search.fileList=listTemp;
+                sp.storePath(f.getAbsolutePath());
+            }
+            else if(option==JFileChooser.CANCEL_OPTION){
+                setVisible(false);
+                dispose();
+                System.exit(0);
+            }
         }
+       
+        
+        
+        
+        
+        
         
         tableModel=resultsTable.getModel();
+        resultsTable.setRowHeight(120);
+        resultsTable.setDefaultRenderer(String.class, new MultiLineCellRenderer());
+//        resultsTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        resultsTable.getColumnModel().getColumn(0).setMaxWidth(40);
+        resultsTable.getColumnModel().getColumn(1).setMaxWidth(300);
+        resultsTable.getColumnModel().getColumn(2).setMaxWidth(500);
+        resultsTable.getColumnModel().getColumn(3).setMaxWidth(500);
+        resultsTable.getColumnModel().getColumn(4).setMaxWidth(500);
+        resultsTable.getColumnModel().getColumn(5).setMaxWidth(500);
+        updatetable(listTemp);
+//        resizeColumnWidth(resultsTable);
+//        resultsTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+        
         fileSearchBox.setEditable(true);
         fileComboHelp=new FileNoComboSuggest(fileSearchBox);
         fileSearchBox.setModel(fileComboHelp);
         fileSearchBox.addItemListener(fileComboHelp);
         
-        subSearchBox.setEditable(true);
-        subSearchHelp=new SubjComboSuggest(subSearchBox);
-        subSearchBox.setModel(subSearchHelp);
-        subSearchBox.addItemListener(subSearchHelp);
-        resultsTable.setRowHeight(160);
-        resultsTable.setDefaultRenderer(String.class, new MultiLineCellRenderer());
+       
+        
+        
+        
+        
+        
+        subjBox.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent evt)
+            {
+                if(evt.getKeyCode()==KeyEvent.VK_ENTER){
+                    List<HardCopy> l=Search.getBySubject(subjBox.getText());
+                    updatetable(l);
+                }
+                    
+            }
+        });
     }
 
     /**
@@ -88,7 +135,6 @@ public class FileSearchForm extends javax.swing.JFrame {
     private void initComponents() {
 
         fileSearchBox = new javax.swing.JComboBox();
-        subSearchBox = new javax.swing.JComboBox();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
@@ -98,6 +144,10 @@ public class FileSearchForm extends javax.swing.JFrame {
         outDateChoose = new com.toedter.calendar.JDateChooser();
         inDateChoose = new com.toedter.calendar.JDateChooser();
         searchButton = new javax.swing.JButton();
+        subjBox = new javax.swing.JTextField();
+        openFileButton = new javax.swing.JButton();
+        jLabel5 = new javax.swing.JLabel();
+        resultsNumber = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -106,14 +156,6 @@ public class FileSearchForm extends javax.swing.JFrame {
         fileSearchBox.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 fileSearchBoxActionPerformed(evt);
-            }
-        });
-
-        subSearchBox.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
-        subSearchBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        subSearchBox.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                subSearchBoxActionPerformed(evt);
             }
         });
 
@@ -129,9 +171,90 @@ public class FileSearchForm extends javax.swing.JFrame {
         jLabel4.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
         jLabel4.setText("Outward Date");
 
+        resultsTable.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
         resultsTable.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
         resultsTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
                 {null, null, null, null, null, null},
                 {null, null, null, null, null, null},
                 {null, null, null, null, null, null},
@@ -172,6 +295,9 @@ public class FileSearchForm extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
+        resultsTable.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
+        resultsTable.setColumnSelectionAllowed(true);
+        resultsTable.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jScrollPane2.setViewportView(resultsTable);
         if (resultsTable.getColumnModel().getColumnCount() > 0) {
             resultsTable.getColumnModel().getColumn(0).setResizable(false);
@@ -196,65 +322,103 @@ public class FileSearchForm extends javax.swing.JFrame {
             }
         });
 
+        subjBox.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        subjBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                subjBoxActionPerformed(evt);
+            }
+        });
+
+        openFileButton.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        openFileButton.setText("Open a new File");
+        openFileButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                openFileButtonActionPerformed(evt);
+            }
+        });
+
+        jLabel5.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        jLabel5.setText("Total Results found:");
+
+        resultsNumber.setEditable(false);
+        resultsNumber.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+            .addGroup(layout.createSequentialGroup()
+                .addGap(24, 24, 24)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 1512, Short.MAX_VALUE)
+                .addContainerGap())
+            .addGroup(layout.createSequentialGroup()
+                .addGap(48, 48, 48)
+                .addComponent(openFileButton)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGap(106, 106, 106)
-                        .addComponent(jLabel1)
+                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 1, Short.MAX_VALUE)
                         .addGap(16, 16, 16)
-                        .addComponent(fileSearchBox, javax.swing.GroupLayout.PREFERRED_SIZE, 282, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(fileSearchBox, javax.swing.GroupLayout.PREFERRED_SIZE, 178, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(82, 82, 82)
-                        .addComponent(jLabel2)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(subSearchBox, javax.swing.GroupLayout.PREFERRED_SIZE, 356, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 1, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(subjBox, javax.swing.GroupLayout.PREFERRED_SIZE, 297, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(201, 201, 201))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(81, 81, 81)
+                        .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 171, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(resultsNumber, javax.swing.GroupLayout.PREFERRED_SIZE, 57, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 132, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(18, 18, 18)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(inDateChoose, javax.swing.GroupLayout.PREFERRED_SIZE, 177, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(outDateChoose, javax.swing.GroupLayout.PREFERRED_SIZE, 177, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jLabel4)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(outDateChoose, javax.swing.GroupLayout.DEFAULT_SIZE, 177, Short.MAX_VALUE)
-                    .addComponent(inDateChoose, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(171, 171, 171))
-            .addGroup(layout.createSequentialGroup()
-                .addGap(198, 198, 198)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 1231, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(119, Short.MAX_VALUE))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(searchButton, javax.swing.GroupLayout.PREFERRED_SIZE, 134, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(277, 277, 277))
+                        .addComponent(searchButton, javax.swing.GroupLayout.PREFERRED_SIZE, 134, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(277, 277, 277))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
+                .addGap(22, 22, 22)
+                .addComponent(openFileButton)
+                .addGap(32, 32, 32)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(88, 88, 88)
                         .addComponent(inDateChoose, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(30, 30, 30))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(79, 79, 79)
+                        .addGap(30, 30, 30)
+                        .addComponent(outDateChoose, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(33, 33, 33)
+                        .addComponent(searchButton))
+                    .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(fileSearchBox, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel1)
-                            .addComponent(subSearchBox, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel2)
-                            .addComponent(jLabel3))
-                        .addGap(21, 21, 21)))
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(outDateChoose, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(30, 30, 30)
-                .addComponent(searchButton)
-                .addGap(28, 28, 28)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                            .addComponent(jLabel3)
+                            .addComponent(subjBox, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(26, 26, 26)
+                                .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(47, 47, 47)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(resultsNumber, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))))))
+                .addGap(18, 18, 18)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 565, Short.MAX_VALUE))
         );
 
         pack();
@@ -271,14 +435,6 @@ public class FileSearchForm extends javax.swing.JFrame {
         
     }//GEN-LAST:event_fileSearchBoxActionPerformed
 
-    private void subSearchBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_subSearchBoxActionPerformed
-       try {
-           List<HardCopy> l=subSearchHelp.database;
-           updatetable(l);
-        } catch (Exception e) {
-        }
-    }//GEN-LAST:event_subSearchBoxActionPerformed
-
     private void inDateChoosePropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_inDateChoosePropertyChange
         // TODO add your handling code here:
         
@@ -294,6 +450,29 @@ public class FileSearchForm extends javax.swing.JFrame {
         } catch (Exception e) {
         }
     }//GEN-LAST:event_searchButtonActionPerformed
+
+    private void openFileButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openFileButtonActionPerformed
+        JFileChooser chooser = new JFileChooser();
+        chooser.setMultiSelectionEnabled(false);
+        FileNameExtensionFilter filter = new FileNameExtensionFilter(
+        "Excel files", "xls", "xlsx");
+        chooser.setFileFilter(filter);
+        int option = chooser.showOpenDialog(FileSearchForm.this);
+        
+        if(option==JFileChooser.APPROVE_OPTION){
+            File f=chooser.getSelectedFile();
+            System.out.println(f.getName());
+            List<HardCopy> list=ExcelParser.readExcelData(f.getAbsolutePath());
+            Search.fileList=list;
+            StoredPath sp=new StoredPath();
+            sp.storePath(f.getAbsolutePath());
+        }
+        
+    }//GEN-LAST:event_openFileButtonActionPerformed
+
+    private void subjBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_subjBoxActionPerformed
+        
+    }//GEN-LAST:event_subjBoxActionPerformed
 
     /**
      * @param args the command line arguments
@@ -378,9 +557,22 @@ public class FileSearchForm extends javax.swing.JFrame {
                     tableModel.setValueAt("", j, k);
                 }
             }
+            
+            resultsNumber.setText(String.valueOf(l.size()));
     }
     
-    
+  public void resizeColumnWidth(JTable table) {
+    final TableColumnModel columnModel = table.getColumnModel();
+    for (int column = 0; column < table.getColumnCount(); column++) {
+        int width = 50; // Min width
+        for (int row = 0; row < table.getRowCount(); row++) {
+            TableCellRenderer renderer = table.getCellRenderer(row, column);
+            Component comp = table.prepareRenderer(renderer, row, column);
+            width = Math.max(comp.getPreferredSize().width, width);
+        }
+        columnModel.getColumn(column).setPreferredWidth(width);
+    }
+}
     
     
     
@@ -393,11 +585,14 @@ public class FileSearchForm extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JButton openFileButton;
     private com.toedter.calendar.JDateChooser outDateChoose;
+    private javax.swing.JTextField resultsNumber;
     private javax.swing.JTable resultsTable;
     private javax.swing.JButton searchButton;
-    private javax.swing.JComboBox subSearchBox;
+    private javax.swing.JTextField subjBox;
     // End of variables declaration//GEN-END:variables
 }
 class MultiLineCellRenderer extends JTextArea implements TableCellRenderer {
@@ -433,80 +628,4 @@ class MultiLineCellRenderer extends JTextArea implements TableCellRenderer {
   
 }
 
-
-class SimpleFileChooser extends JFrame {
-
-   public SimpleFileChooser() {
-    super("File Chooser Test Frame");
-    setSize(350, 200);
-    setDefaultCloseOperation(EXIT_ON_CLOSE);
-
-    Container c = getContentPane();
-    c.setLayout(new FlowLayout());
-    
-    JButton openButton = new JButton("Open");
-    JButton saveButton = new JButton("Save");
-    JButton dirButton = new JButton("Pick Dir");
-    final JLabel statusbar = 
-                 new JLabel("Output of your selection will go here");
-
-    // Create a file chooser that opens up as an Open dialog
-    openButton.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent ae) {
-        JFileChooser chooser = new JFileChooser();
-        chooser.setMultiSelectionEnabled(true);
-        int option = chooser.showOpenDialog(SimpleFileChooser.this);
-        if (option == JFileChooser.APPROVE_OPTION) {
-          File[] sf = chooser.getSelectedFiles();
-          String filelist = "nothing";
-          if (sf.length > 0) filelist = sf[0].getName();
-          for (int i = 1; i < sf.length; i++) {
-            filelist += ", " + sf[i].getName();
-          }
-          statusbar.setText("You chose " + filelist);
-        }
-        else {
-          statusbar.setText("You canceled.");
-        }
-      }
-    });
-
-    // Create a file chooser that opens up as a Save dialog
-    saveButton.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent ae) {
-        JFileChooser chooser = new JFileChooser();
-        int option = chooser.showSaveDialog(SimpleFileChooser.this);
-        if (option == JFileChooser.APPROVE_OPTION) {
-          statusbar.setText("You saved " + ((chooser.getSelectedFile()!=null)?
-                            chooser.getSelectedFile().getName():"nothing"));
-        }
-        else {
-          statusbar.setText("You canceled.");
-        }
-      }
-    });
-
-    // Create a file chooser that allows you to pick a directory
-    // rather than a file
-    dirButton.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent ae) {
-        JFileChooser chooser = new JFileChooser();
-        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        int option = chooser.showOpenDialog(SimpleFileChooser.this);
-        if (option == JFileChooser.APPROVE_OPTION) {
-          statusbar.setText("You opened " + ((chooser.getSelectedFile()!=null)?
-                            chooser.getSelectedFile().getName():"nothing"));
-        }
-        else {
-          statusbar.setText("You canceled.");
-        }
-      }
-    });
-
-    c.add(openButton);
-    c.add(saveButton);
-    c.add(dirButton);
-    c.add(statusbar);
-  }
-}
 

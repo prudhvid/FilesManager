@@ -19,6 +19,7 @@ public class Search {
     }
     public static List<HardCopy> getByFileNo(String fno)
     {
+        fno=fno.toUpperCase();
         List<HardCopy> retList = new LinkedList<>();
         for (HardCopy file : fileList) {
             if(file.fileNo.contains(fno))
@@ -28,6 +29,7 @@ public class Search {
     }
     public static List<HardCopy> getBySubject(String sub)
     {
+        sub=sub.toUpperCase();
         List<HardCopy> retList = new LinkedList<>();
         for (HardCopy file : fileList) {
             if(file.subject.contains(sub))
