@@ -22,6 +22,7 @@ import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.UIManager;
@@ -39,13 +40,13 @@ public class FileSearchForm extends javax.swing.JFrame {
     FileNoComboSuggest fileComboHelp;
     SubjComboSuggest subSearchHelp;
     TableModel tableModel;
-    
+    boolean fileNotFound;
     /**
      * Creates new form FileSearchForm
      */
     public FileSearchForm() {
         initComponents();
-        
+        fileNotFound=false;
         
         
         GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
@@ -56,8 +57,17 @@ public class FileSearchForm extends javax.swing.JFrame {
         StoredPath sp=new StoredPath();
         if(sp.isPathPres()){
             System.out.println(sp.getPath());
-             listTemp=ExcelParser.readExcelData(sp.getPath());
-            Search.fileList=listTemp;
+            File f=new File(sp.getPath());
+            if(f.exists()){
+                listTemp=ExcelParser.readExcelData(sp.getPath());
+                Search.fileList=listTemp;    
+            }
+            else{
+                JOptionPane.showMessageDialog(this, "sorry previous file not found!");
+                fileNotFound=true;
+                openFileButtonActionPerformed(null);
+            }
+            
         }
         else{
             JFileChooser chooser = new JFileChooser();
@@ -466,6 +476,10 @@ public class FileSearchForm extends javax.swing.JFrame {
             Search.fileList=list;
             StoredPath sp=new StoredPath();
             sp.storePath(f.getAbsolutePath());
+        }
+        else if(option==JFileChooser.CANCEL_OPTION&&fileNotFound==true){
+            this.dispose();
+            System.exit(0);
         }
         
     }//GEN-LAST:event_openFileButtonActionPerformed
