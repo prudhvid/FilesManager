@@ -7,12 +7,22 @@
 package FilesManager;
 
 import java.awt.Component;
+import java.awt.Container;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
 import java.util.Date;
 import java.util.List;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 
@@ -29,6 +39,31 @@ public class FileSearchForm extends javax.swing.JFrame {
      */
     public FileSearchForm() {
         initComponents();
+        
+        /*
+        File choosing
+        */
+        
+        JFileChooser chooser = new JFileChooser();
+        chooser.setMultiSelectionEnabled(false);
+        FileNameExtensionFilter filter = new FileNameExtensionFilter(
+        "Excel files", "xls", "xlsx");
+        chooser.setFileFilter(filter);
+        int option = chooser.showOpenDialog(FileSearchForm.this);
+        
+        if(option==JFileChooser.APPROVE_OPTION){
+            
+            File f=chooser.getSelectedFile();
+            System.out.println(f.getName());
+            List<HardCopy> list=ExcelParser.readExcelData(f.getAbsolutePath());
+            Search.fileList=list;
+        }
+        else if(option==JFileChooser.CANCEL_OPTION){
+            setVisible(false);
+            dispose();
+            System.exit(0);
+        }
+        
         tableModel=resultsTable.getModel();
         fileSearchBox.setEditable(true);
         fileComboHelp=new FileNoComboSuggest(fileSearchBox);
@@ -219,7 +254,7 @@ public class FileSearchForm extends javax.swing.JFrame {
                 .addComponent(searchButton)
                 .addGap(28, 28, 28)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(111, 111, 111))
+                .addContainerGap())
         );
 
         pack();
@@ -286,8 +321,7 @@ public class FileSearchForm extends javax.swing.JFrame {
             java.util.logging.Logger.getLogger(FileSearchForm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
-        List<HardCopy> list=ExcelParser.readExcelData("Files.xlsx");
-        Search.fileList=list;
+        
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
@@ -399,4 +433,80 @@ class MultiLineCellRenderer extends JTextArea implements TableCellRenderer {
   
 }
 
+
+class SimpleFileChooser extends JFrame {
+
+   public SimpleFileChooser() {
+    super("File Chooser Test Frame");
+    setSize(350, 200);
+    setDefaultCloseOperation(EXIT_ON_CLOSE);
+
+    Container c = getContentPane();
+    c.setLayout(new FlowLayout());
+    
+    JButton openButton = new JButton("Open");
+    JButton saveButton = new JButton("Save");
+    JButton dirButton = new JButton("Pick Dir");
+    final JLabel statusbar = 
+                 new JLabel("Output of your selection will go here");
+
+    // Create a file chooser that opens up as an Open dialog
+    openButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent ae) {
+        JFileChooser chooser = new JFileChooser();
+        chooser.setMultiSelectionEnabled(true);
+        int option = chooser.showOpenDialog(SimpleFileChooser.this);
+        if (option == JFileChooser.APPROVE_OPTION) {
+          File[] sf = chooser.getSelectedFiles();
+          String filelist = "nothing";
+          if (sf.length > 0) filelist = sf[0].getName();
+          for (int i = 1; i < sf.length; i++) {
+            filelist += ", " + sf[i].getName();
+          }
+          statusbar.setText("You chose " + filelist);
+        }
+        else {
+          statusbar.setText("You canceled.");
+        }
+      }
+    });
+
+    // Create a file chooser that opens up as a Save dialog
+    saveButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent ae) {
+        JFileChooser chooser = new JFileChooser();
+        int option = chooser.showSaveDialog(SimpleFileChooser.this);
+        if (option == JFileChooser.APPROVE_OPTION) {
+          statusbar.setText("You saved " + ((chooser.getSelectedFile()!=null)?
+                            chooser.getSelectedFile().getName():"nothing"));
+        }
+        else {
+          statusbar.setText("You canceled.");
+        }
+      }
+    });
+
+    // Create a file chooser that allows you to pick a directory
+    // rather than a file
+    dirButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent ae) {
+        JFileChooser chooser = new JFileChooser();
+        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        int option = chooser.showOpenDialog(SimpleFileChooser.this);
+        if (option == JFileChooser.APPROVE_OPTION) {
+          statusbar.setText("You opened " + ((chooser.getSelectedFile()!=null)?
+                            chooser.getSelectedFile().getName():"nothing"));
+        }
+        else {
+          statusbar.setText("You canceled.");
+        }
+      }
+    });
+
+    c.add(openButton);
+    c.add(saveButton);
+    c.add(dirButton);
+    c.add(statusbar);
+  }
+}
 
