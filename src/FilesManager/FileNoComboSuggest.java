@@ -92,7 +92,10 @@ public class FileNoComboSuggest extends AbstractListModel
             }
         }
         else if(e.getKeyCode() == KeyEvent.VK_ENTER)
+        {
             cb.setSelectedIndex(cb.getSelectedIndex());
+            updateModel(cb.getEditor().getItem().toString());
+        }
         else
         {
             updateModel(cb.getEditor().getItem().toString());

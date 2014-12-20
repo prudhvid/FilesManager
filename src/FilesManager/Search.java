@@ -80,5 +80,19 @@ public class Search {
         return retList;
         
     }
+    public static List<HardCopy> getAllPending()
+    {
+        List<HardCopy> retList = new LinkedList<>();
+        for (HardCopy hardCopy : fileList) {
+            try {
+                if(hardCopy.outDate==null||hardCopy.inDate==null||hardCopy.dispatchedTo==null)
+                    retList.add(hardCopy);
+            } catch (Exception e) {
+            }
+            
+            
+        }
+        return retList;
+    }
     
 }

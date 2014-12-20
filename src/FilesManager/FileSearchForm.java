@@ -16,6 +16,7 @@ import java.awt.event.ItemListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.text.DateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.prefs.Preferences;
@@ -33,6 +34,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
+import org.apache.poi.hssf.record.chart.DatRecord;
 
 /**
  *
@@ -43,6 +45,8 @@ public class FileSearchForm extends javax.swing.JFrame {
     SubjComboSuggest subSearchHelp;
     TableModel tableModel;
     boolean fileNotFound;
+    final int FILE_SEARCH=1,SUB_SEARCH=2,DATE_SEARCH=3;
+    int lastSearchMade;
     /**
      * Creates new form FileSearchForm
      */
@@ -53,8 +57,10 @@ public class FileSearchForm extends javax.swing.JFrame {
         
         GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
         this.setExtendedState(this.getExtendedState() | this.MAXIMIZED_BOTH);
-        
-        
+        buttonGroup1.add(onlyPending);
+        buttonGroup1.add(onlyDispatched);
+        buttonGroup1.add(bothPndingNDisppatched);
+        bothPndingNDisppatched.setSelected(true);
         List<HardCopy> listTemp=null;
         StoredPath sp=new StoredPath();
         if(sp.isPathPres()){
@@ -100,16 +106,17 @@ public class FileSearchForm extends javax.swing.JFrame {
         
         
         tableModel=resultsTable.getModel();
-        resultsTable.setRowHeight(120);
+//        resultsTable.setRowHeight(120);
         resultsTable.setDefaultRenderer(String.class, new MultiLineCellRenderer());
 //        resultsTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         resultsTable.getColumnModel().getColumn(0).setMaxWidth(40);
-        resultsTable.getColumnModel().getColumn(1).setMaxWidth(300);
-        resultsTable.getColumnModel().getColumn(2).setMaxWidth(500);
-        resultsTable.getColumnModel().getColumn(3).setMaxWidth(500);
-        resultsTable.getColumnModel().getColumn(4).setMaxWidth(500);
-        resultsTable.getColumnModel().getColumn(5).setMaxWidth(500);
-        updatetable(listTemp);
+        resultsTable.getColumnModel().getColumn(1).setMaxWidth(200);
+        resultsTable.getColumnModel().getColumn(2).setMaxWidth(250);
+        resultsTable.getColumnModel().getColumn(3).setMaxWidth(700);
+        resultsTable.getColumnModel().getColumn(4).setMaxWidth(200);
+        resultsTable.getColumnModel().getColumn(5).setMaxWidth(200);
+        updateGUI(listTemp);
+        lastSearchMade=SUB_SEARCH;
 //        resizeColumnWidth(resultsTable);
 //        resultsTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
         
@@ -130,7 +137,8 @@ public class FileSearchForm extends javax.swing.JFrame {
             {
                 if(evt.getKeyCode()==KeyEvent.VK_ENTER){
                     List<HardCopy> l=Search.getBySubject(subjBox.getText());
-                    updatetable(l);
+                    updateGUI(l);
+                    lastSearchMade=SUB_SEARCH;
                 }
                     
             }
@@ -161,6 +169,12 @@ public class FileSearchForm extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        buttonGroup1 = new javax.swing.ButtonGroup();
+        buttonGroup2 = new javax.swing.ButtonGroup();
+        buttonGroup3 = new javax.swing.ButtonGroup();
+        buttonGroup4 = new javax.swing.ButtonGroup();
+        buttonGroup5 = new javax.swing.ButtonGroup();
+        buttonGroup6 = new javax.swing.ButtonGroup();
         fileSearchBox = new javax.swing.JComboBox();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
@@ -170,14 +184,20 @@ public class FileSearchForm extends javax.swing.JFrame {
         resultsTable = new javax.swing.JTable();
         outDateChoose = new com.toedter.calendar.JDateChooser();
         inDateChoose = new com.toedter.calendar.JDateChooser();
-        searchButton = new javax.swing.JButton();
+        searchByDateButton = new javax.swing.JButton();
         subjBox = new javax.swing.JTextField();
         openFileButton = new javax.swing.JButton();
         jLabel5 = new javax.swing.JLabel();
         resultsNumber = new javax.swing.JTextField();
         jLabel6 = new javax.swing.JLabel();
+        jLabel7 = new javax.swing.JLabel();
+        pendingNumber = new javax.swing.JTextField();
+        onlyPending = new javax.swing.JRadioButton();
+        onlyDispatched = new javax.swing.JRadioButton();
+        bothPndingNDisppatched = new javax.swing.JRadioButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setFocusable(false);
 
         fileSearchBox.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
         fileSearchBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
@@ -329,17 +349,8 @@ public class FileSearchForm extends javax.swing.JFrame {
             }
         });
         resultsTable.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
-        resultsTable.setColumnSelectionAllowed(true);
         resultsTable.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jScrollPane2.setViewportView(resultsTable);
-        if (resultsTable.getColumnModel().getColumnCount() > 0) {
-            resultsTable.getColumnModel().getColumn(0).setResizable(false);
-            resultsTable.getColumnModel().getColumn(1).setResizable(false);
-            resultsTable.getColumnModel().getColumn(2).setResizable(false);
-            resultsTable.getColumnModel().getColumn(3).setResizable(false);
-            resultsTable.getColumnModel().getColumn(4).setResizable(false);
-            resultsTable.getColumnModel().getColumn(5).setResizable(false);
-        }
 
         inDateChoose.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
             public void propertyChange(java.beans.PropertyChangeEvent evt) {
@@ -347,11 +358,11 @@ public class FileSearchForm extends javax.swing.JFrame {
             }
         });
 
-        searchButton.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
-        searchButton.setText("Search By Date");
-        searchButton.addActionListener(new java.awt.event.ActionListener() {
+        searchByDateButton.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        searchByDateButton.setText("Search By Date");
+        searchByDateButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                searchButtonActionPerformed(evt);
+                searchByDateButtonActionPerformed(evt);
             }
         });
 
@@ -375,78 +386,137 @@ public class FileSearchForm extends javax.swing.JFrame {
 
         resultsNumber.setEditable(false);
         resultsNumber.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        resultsNumber.setFocusable(false);
+
+        jLabel7.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        jLabel7.setText("Pending:");
+
+        pendingNumber.setEditable(false);
+        pendingNumber.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        pendingNumber.setFocusable(false);
+        pendingNumber.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                pendingNumberActionPerformed(evt);
+            }
+        });
+
+        onlyPending.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        onlyPending.setText("Show only pending");
+        onlyPending.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                onlyPendingActionPerformed(evt);
+            }
+        });
+
+        onlyDispatched.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        onlyDispatched.setText("Show only dispatched");
+        onlyDispatched.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                onlyDispatchedActionPerformed(evt);
+            }
+        });
+
+        bothPndingNDisppatched.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        bothPndingNDisppatched.setText("Show Both Pending and dispatched");
+        bothPndingNDisppatched.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                bothPndingNDisppatchedActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
+                .addGap(48, 48, 48)
+                .addComponent(openFileButton))
+            .addGroup(layout.createSequentialGroup()
+                .addGap(66, 66, 66)
+                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(52, 52, 52)
+                .addComponent(fileSearchBox, javax.swing.GroupLayout.PREFERRED_SIZE, 178, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(671, 671, 671)
+                .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(41, 41, 41)
+                .addComponent(inDateChoose, javax.swing.GroupLayout.PREFERRED_SIZE, 177, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addGroup(layout.createSequentialGroup()
+                .addGap(12, 12, 12)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(48, 48, 48)
-                        .addComponent(openFileButton))
+                        .addGap(53, 53, 53)
+                        .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 171, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(16, 16, 16)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(subjBox, javax.swing.GroupLayout.PREFERRED_SIZE, 297, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 171, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
+                        .addGap(2, 2, 2)
                         .addComponent(resultsNumber, javax.swing.GroupLayout.PREFERRED_SIZE, 57, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(790, 790, 790)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 132, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addComponent(outDateChoose, javax.swing.GroupLayout.PREFERRED_SIZE, 177, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(searchButton, javax.swing.GroupLayout.PREFERRED_SIZE, 210, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(49, 49, 49)
+                        .addComponent(jLabel7)
+                        .addGap(12, 12, 12)
+                        .addComponent(pendingNumber, javax.swing.GroupLayout.PREFERRED_SIZE, 66, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addComponent(jLabel6)
+                .addGap(24, 24, 24)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(onlyPending)
+                    .addComponent(bothPndingNDisppatched)
+                    .addComponent(onlyDispatched))
+                .addGap(219, 219, 219)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(65, 65, 65)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(52, 52, 52)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(fileSearchBox, javax.swing.GroupLayout.PREFERRED_SIZE, 178, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(671, 671, 671)
-                                .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(41, 41, 41)
-                                .addComponent(inDateChoose, javax.swing.GroupLayout.PREFERRED_SIZE, 177, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                .addComponent(jLabel6)
-                                .addComponent(subjBox, javax.swing.GroupLayout.PREFERRED_SIZE, 297, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(24, 24, 24)
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 1474, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(23, Short.MAX_VALUE))
+                        .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 132, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(outDateChoose, javax.swing.GroupLayout.PREFERRED_SIZE, 177, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(searchByDateButton, javax.swing.GroupLayout.PREFERRED_SIZE, 210, javax.swing.GroupLayout.PREFERRED_SIZE)))
+            .addGroup(layout.createSequentialGroup()
+                .addGap(24, 24, 24)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 1474, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(22, 22, 22)
                 .addComponent(openFileButton)
+                .addGap(36, 36, 36)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(32, 32, 32)
+                        .addGap(11, 11, 11)
+                        .addComponent(jLabel1))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(1, 1, 1)
+                        .addComponent(fileSearchBox, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(11, 11, 11)
+                        .addComponent(jLabel3))
+                    .addComponent(inDateChoose, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(16, 16, 16)
+                        .addComponent(jLabel2)
+                        .addGap(16, 16, 16)
+                        .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(7, 7, 7)
+                        .addComponent(subjBox, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(7, 7, 7)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(inDateChoose, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(resultsNumber, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGroup(layout.createSequentialGroup()
-                                .addGap(9, 9, 9)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addComponent(jLabel3)))))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(fileSearchBox, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGap(3, 3, 3)
+                                .addComponent(jLabel7))
+                            .addComponent(pendingNumber, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addGroup(layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(subjBox, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel2))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(resultsNumber, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel6)))
+                        .addGap(54, 54, 54)
+                        .addComponent(jLabel6))
+                    .addComponent(onlyPending)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(60, 60, 60)
+                        .addComponent(bothPndingNDisppatched))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(30, 30, 30)
+                        .addComponent(onlyDispatched))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(12, 12, 12)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -455,17 +525,16 @@ public class FileSearchForm extends javax.swing.JFrame {
                                 .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addComponent(outDateChoose, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(16, 16, 16)
-                        .addComponent(searchButton)))
+                        .addComponent(searchByDateButton)))
                 .addGap(18, 18, 18)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 537, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(153, Short.MAX_VALUE))
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 537, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
     private void fileSearchBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fileSearchBoxActionPerformed
-        
+       
         List<HardCopy> l=null;
         try {
             l=fileComboHelp.database;
@@ -475,7 +544,8 @@ public class FileSearchForm extends javax.swing.JFrame {
             e.printStackTrace();;
         }
         
-         updatetable(l);
+         updateGUI(l);
+         lastSearchMade=FILE_SEARCH;
         
     }//GEN-LAST:event_fileSearchBoxActionPerformed
 
@@ -484,16 +554,17 @@ public class FileSearchForm extends javax.swing.JFrame {
         
     }//GEN-LAST:event_inDateChoosePropertyChange
 
-    private void searchButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchButtonActionPerformed
+    private void searchByDateButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchByDateButtonActionPerformed
         // TODO add your handling code here:
         try {
             Date d1=inDateChoose.getDate();
             Date d2=outDateChoose.getDate();
             List<HardCopy> l=Search.getByDates(d1, d2);
-            updatetable(l);
+            updateGUI(l);
         } catch (Exception e) {
         }
-    }//GEN-LAST:event_searchButtonActionPerformed
+        lastSearchMade=DATE_SEARCH;
+    }//GEN-LAST:event_searchByDateButtonActionPerformed
 
     private void openFileButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openFileButtonActionPerformed
         JFileChooser chooser = new JFileChooser();
@@ -519,12 +590,45 @@ public class FileSearchForm extends javax.swing.JFrame {
     }//GEN-LAST:event_openFileButtonActionPerformed
 
     private void subjBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_subjBoxActionPerformed
-        
+        List<HardCopy> l=Search.getBySubject(subjBox.getText());
+        updateGUI(l);
+        lastSearchMade=SUB_SEARCH;
     }//GEN-LAST:event_subjBoxActionPerformed
 
     private void fileSearchBoxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_fileSearchBoxItemStateChanged
       
     }//GEN-LAST:event_fileSearchBoxItemStateChanged
+
+    private void pendingNumberActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pendingNumberActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_pendingNumberActionPerformed
+
+    private void onlyPendingActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_onlyPendingActionPerformed
+        if(lastSearchMade==SUB_SEARCH)
+            subjBoxActionPerformed(null);
+        else if(lastSearchMade==FILE_SEARCH)
+            fileSearchBoxActionPerformed(null);
+        else
+            searchByDateButtonActionPerformed(null);
+    }//GEN-LAST:event_onlyPendingActionPerformed
+
+    private void onlyDispatchedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_onlyDispatchedActionPerformed
+        if(lastSearchMade==SUB_SEARCH)
+            subjBoxActionPerformed(null);
+        else if(lastSearchMade==FILE_SEARCH)
+            fileSearchBoxActionPerformed(null);
+        else
+            searchByDateButtonActionPerformed(null);
+    }//GEN-LAST:event_onlyDispatchedActionPerformed
+
+    private void bothPndingNDisppatchedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bothPndingNDisppatchedActionPerformed
+        if(lastSearchMade==SUB_SEARCH)
+            subjBoxActionPerformed(null);
+        else if(lastSearchMade==FILE_SEARCH)
+            fileSearchBoxActionPerformed(null);
+        else
+            searchByDateButtonActionPerformed(null);
+    }//GEN-LAST:event_bothPndingNDisppatchedActionPerformed
 
     /**
      * @param args the command line arguments
@@ -566,28 +670,48 @@ public class FileSearchForm extends javax.swing.JFrame {
     {
         try
         {
+            
             for (int row = 0; row < resultsTable.getRowCount(); row++)
             {
                 int rowHeight = resultsTable.getRowHeight();
                 int column=3;
+                int prev=rowHeight;
                 Component comp = resultsTable.prepareRenderer(resultsTable.getCellRenderer(row, column), row, column);
-                rowHeight = Math.max(rowHeight, comp.getPreferredSize().height);
+                rowHeight = Math.max(rowHeight, comp.getPreferredSize().height+20);
+                System.out.println("row height ="+rowHeight+"   prev ="+prev);
                 resultsTable.setRowHeight(row, rowHeight);
             }
         }
-        catch(ClassCastException e) {}
+        catch(ClassCastException e) {
+            e.printStackTrace();
+        }
     }
-    private void updatetable(List<HardCopy> l)
+    private void updateGUI(List<HardCopy> l)
     {
         int index=0;
         
+        DateFormat df=DateFormat.getDateInstance();
+        
+        
+        
         if(l!=null){
-            System.out.println(l.size());
+//            System.out.println(l.size());
             for (HardCopy hardCopy : l) {
                 if(index>=100)
                     break;
+                if(onlyDispatched.isSelected()&&hardCopy.isPending())
+                {
+                    continue;
+                }
+                    
+                if(onlyPending.isSelected()&&!hardCopy.isPending())
+                {
+                    continue;
+                }
                 tableModel.setValueAt(index+1, index, 0);
-                tableModel.setValueAt(hardCopy.inDate.toLocaleString(), index, 1);
+//                tableModel.setValueAt(hardCopy.inDate.getDate()+"-"+hardCopy.inDate.getMonth()
+//                                        +"-"+hardCopy.inDate.getYear(), index, 1);
+                tableModel.setValueAt(df.format(hardCopy.inDate), index, 1);
                 tableModel.setValueAt(hardCopy.fileNo, index, 2);
                 if(hardCopy.subject!=null)
                 {
@@ -595,16 +719,22 @@ public class FileSearchForm extends javax.swing.JFrame {
                     StringBuilder sb = new StringBuilder(s);
 
                     int i = 0;
-                    while ((i = sb.indexOf(" ", i + 30)) != -1) {
+                    while ((i = sb.indexOf(" ", i + 55)) != -1) {
                         sb.replace(i, i + 1, "\n");
                     }
                     tableModel.setValueAt(sb.toString(), index, 3);
 
                 }
+                else
+                    tableModel.setValueAt("", index, 3);
                 if(hardCopy.outDate!=null)
-                    tableModel.setValueAt(hardCopy.outDate.toLocaleString(), index, 4);
+                    tableModel.setValueAt(df.format(hardCopy.outDate), index, 4);
+                else
+                    tableModel.setValueAt("", index, 4);
                 if(hardCopy.dispatchedTo!=null)
                     tableModel.setValueAt(hardCopy.dispatchedTo, index, 5);
+                else
+                    tableModel.setValueAt("", index, 5);
                 index++;
             }
         }
@@ -613,8 +743,14 @@ public class FileSearchForm extends javax.swing.JFrame {
                     tableModel.setValueAt("", j, k);
             }
         }
-            
-            resultsNumber.setText(String.valueOf(l.size()));
+        resultsNumber.setText(String.valueOf(l.size()));
+        int count=0;
+        for (HardCopy hardCopy : l) {
+            if(hardCopy.outDate==null||hardCopy.dispatchedTo==null)
+                count++;
+        }
+        pendingNumber.setText(count+"");
+        updateRowHeights();
     }
     
   public void resizeColumnWidth(JTable table) {
@@ -635,6 +771,13 @@ public class FileSearchForm extends javax.swing.JFrame {
     
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JRadioButton bothPndingNDisppatched;
+    private javax.swing.ButtonGroup buttonGroup1;
+    private javax.swing.ButtonGroup buttonGroup2;
+    private javax.swing.ButtonGroup buttonGroup3;
+    private javax.swing.ButtonGroup buttonGroup4;
+    private javax.swing.ButtonGroup buttonGroup5;
+    private javax.swing.ButtonGroup buttonGroup6;
     private javax.swing.JComboBox fileSearchBox;
     private com.toedter.calendar.JDateChooser inDateChoose;
     private javax.swing.JLabel jLabel1;
@@ -643,12 +786,16 @@ public class FileSearchForm extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JRadioButton onlyDispatched;
+    private javax.swing.JRadioButton onlyPending;
     private javax.swing.JButton openFileButton;
     private com.toedter.calendar.JDateChooser outDateChoose;
+    private javax.swing.JTextField pendingNumber;
     private javax.swing.JTextField resultsNumber;
     private javax.swing.JTable resultsTable;
-    private javax.swing.JButton searchButton;
+    private javax.swing.JButton searchByDateButton;
     private javax.swing.JTextField subjBox;
     // End of variables declaration//GEN-END:variables
 }

@@ -198,4 +198,9 @@ public class HardCopy {
         
         return res;
     }
+    
+    public boolean isPending()
+    {
+        return inDate==null||dispatchedTo.equals("");
+    }
 }
