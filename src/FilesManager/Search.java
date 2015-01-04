@@ -42,14 +42,23 @@ public class Search {
     {
         List<HardCopy> retList = new LinkedList<>();
         for (HardCopy file : fileList) {
-            
+            if(inDate.getDate()==file.inDate.getDate()&&inDate.getMonth()==file.inDate.getMonth()&&
+                    inDate.getYear()==file.inDate.getYear()){
+                retList.add(file);
+            }
         }
         return retList;
         
     }
-    public static List<HardCopy> getByOutwardDate(Date inDate)
+    public static List<HardCopy> getByOutwardDate(Date outDate)
     {
         List<HardCopy> retList = new LinkedList<>();
+        for (HardCopy file : fileList) {
+            if(file.outDate!=null&&file.outDate.getDate()==outDate.getDate()&&file.outDate.getMonth()==outDate.getMonth()
+                    &&file.outDate.getYear()==outDate.getYear()){
+                retList.add(file);
+            }
+        }
         return retList;
         
     }
@@ -69,8 +78,9 @@ public class Search {
         for (HardCopy hardCopy : fileList) {
             try {
                 Date d1=hardCopy.getIndate(),d2=hardCopy.getOutdate();
-                if(d1.compareTo(d2)<0){
+                if(inDate.compareTo(d1)<0&&outDate.compareTo(d2)>0){
                     retList.add(hardCopy);
+                    System.out.println("d1="+d1+"\td2="+d2);
                 }
             } catch (Exception e) {
             }
