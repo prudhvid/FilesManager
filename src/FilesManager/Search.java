@@ -42,6 +42,12 @@ public class Search {
     {
         List<HardCopy> retList = new LinkedList<>();
         for (HardCopy file : fileList) {
+            if(file.inDate==null)
+//            {
+//                System.out.println("null in "+file.subject+"\t "+file.toString());
+//                System.out.println(file.inDate);
+                continue;
+//            }
             if(inDate.getDate()==file.inDate.getDate()&&inDate.getMonth()==file.inDate.getMonth()&&
                     inDate.getYear()==file.inDate.getYear()){
                 retList.add(file);

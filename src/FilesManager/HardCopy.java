@@ -185,12 +185,17 @@ public class HardCopy {
     {
         String res=new String();
         try{
-            res=sno+"\t"+inDate.toString()+"\t"+fileNo+"\t"+subject+"\t";
-        if(outDate!=null)
-            res+=outDate.toString()+"\t";
-        if(dispatchedTo!=null)
-            res+=dispatchedTo+"\n";    
+            if(inDate==null)
+                res="INDATE NULLL\t";
+            else
+                res="INDATE NON NULL\t";
+            res+=sno+"\t"+inDate.toString()+"\t"+fileNo+"\t"+subject+"\t";
+            if(outDate!=null)
+                res+=outDate.toString()+"\t";
+            if(dispatchedTo!=null)
+                res+=dispatchedTo+"\n";    
         }
+        
         catch(Exception e)
         {
             

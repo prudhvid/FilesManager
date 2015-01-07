@@ -37,13 +37,17 @@ public class FileSearchForm extends javax.swing.JFrame {
     boolean fileNotFound;
     final int FILE_SEARCH=1,SUB_SEARCH=2,DATE_SEARCH=3;
     int lastSearchMade;
+    List<HardCopy> lastUsedList;
+    int pagenumber;
+    
     /**
      * Creates new form FileSearchForm
      */
     public FileSearchForm() {
         initComponents();
         fileNotFound=false;
-        
+        lastUsedList=null;
+        pagenumber=0;
         
         GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
         this.setExtendedState(this.getExtendedState() | this.MAXIMIZED_BOTH);
@@ -106,7 +110,8 @@ public class FileSearchForm extends javax.swing.JFrame {
         resultsTable.getColumnModel().getColumn(3).setMaxWidth(750);
         resultsTable.getColumnModel().getColumn(4).setMaxWidth(200);
         resultsTable.getColumnModel().getColumn(5).setMaxWidth(200);
-        updateGUI(listTemp);
+        updateGUI(listTemp,1);
+        System.out.println(listTemp);
         lastSearchMade=SUB_SEARCH;
 //        resizeColumnWidth(resultsTable);
 //        resultsTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
@@ -128,7 +133,7 @@ public class FileSearchForm extends javax.swing.JFrame {
             {
                 if(evt.getKeyCode()==KeyEvent.VK_ENTER){
                     List<HardCopy> l=Search.getBySubject(subjBox.getText());
-                    updateGUI(l);
+                    updateGUI(l,1);
                     lastSearchMade=SUB_SEARCH;
                 }
                     
@@ -188,6 +193,8 @@ public class FileSearchForm extends javax.swing.JFrame {
         bothPndingNDisppatched = new javax.swing.JRadioButton();
         jLabel8 = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
+        nextButton = new javax.swing.JButton();
+        prevButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setFocusable(false);
@@ -342,8 +349,10 @@ public class FileSearchForm extends javax.swing.JFrame {
             }
         });
         resultsTable.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
+        resultsTable.setColumnSelectionAllowed(true);
         resultsTable.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jScrollPane2.setViewportView(resultsTable);
+        resultsTable.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 
         inDateChoose.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
             public void propertyChange(java.beans.PropertyChangeEvent evt) {
@@ -427,6 +436,20 @@ public class FileSearchForm extends javax.swing.JFrame {
             }
         });
 
+        nextButton.setText("Next");
+        nextButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                nextButtonActionPerformed(evt);
+            }
+        });
+
+        prevButton.setText("Prev");
+        prevButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                prevButtonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -481,7 +504,13 @@ public class FileSearchForm extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addContainerGap()
                         .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 1336, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(134, 134, 134))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(prevButton, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(37, 37, 37)
+                .addComponent(nextButton, javax.swing.GroupLayout.PREFERRED_SIZE, 76, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(723, 723, 723))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -536,7 +565,11 @@ public class FileSearchForm extends javax.swing.JFrame {
                             .addComponent(jButton1))))
                 .addGap(18, 18, 18)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 516, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(21, 21, 21))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(nextButton)
+                    .addComponent(prevButton))
+                .addContainerGap(14, Short.MAX_VALUE))
         );
 
         pack();
@@ -553,7 +586,7 @@ public class FileSearchForm extends javax.swing.JFrame {
             e.printStackTrace();;
         }
         
-         updateGUI(l);
+         updateGUI(l,1);
          lastSearchMade=FILE_SEARCH;
         
     }//GEN-LAST:event_fileSearchBoxActionPerformed
@@ -577,8 +610,9 @@ public class FileSearchForm extends javax.swing.JFrame {
                 l=Search.getByInwardDate(d1);
             else
                 l=Search.getByDates(d1, d2);
-            updateGUI(l);
+            updateGUI(l,1);
         } catch (Exception e) {
+            e.printStackTrace();
         }
         lastSearchMade=DATE_SEARCH;
     }//GEN-LAST:event_searchByDateButtonActionPerformed
@@ -608,7 +642,7 @@ public class FileSearchForm extends javax.swing.JFrame {
 
     private void subjBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_subjBoxActionPerformed
         List<HardCopy> l=Search.getBySubject(subjBox.getText());
-        updateGUI(l);
+        updateGUI(l,1);
         lastSearchMade=SUB_SEARCH;
     }//GEN-LAST:event_subjBoxActionPerformed
 
@@ -652,6 +686,26 @@ public class FileSearchForm extends javax.swing.JFrame {
         inDateChoose.setCalendar(null);
         outDateChoose.setCalendar(null);
     }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void nextButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nextButtonActionPerformed
+        // TODO add your handling code here:
+        if(lastUsedList==null)
+            return;
+        if(lastUsedList.size()>100*(pagenumber+1)){
+            updateGUI(lastUsedList,100*(pagenumber+1)+1);
+            pagenumber++;
+        }
+    }//GEN-LAST:event_nextButtonActionPerformed
+
+    private void prevButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_prevButtonActionPerformed
+        // TODO add your handling code here:
+        if(lastUsedList==null)
+            return;
+        if(pagenumber>0){
+            updateGUI(lastUsedList,100*(pagenumber-1)+1);
+            pagenumber--;
+        }
+    }//GEN-LAST:event_prevButtonActionPerformed
 
     /**
      * @param args the command line arguments
@@ -710,12 +764,30 @@ public class FileSearchForm extends javax.swing.JFrame {
             e.printStackTrace();
         }
     }
-    private void updateGUI(List<HardCopy> l)
+    private void updateGUI(List<HardCopy> l,int initindex)
     {
         int index=0;
+        if(initindex==1)
+        {
+            prevButton.setEnabled(false);
+            pagenumber=0;
+        }
+        else
+            prevButton.setEnabled(true);
+        resultsNumber.setText(String.valueOf(l.size()));
+        int count=0;
+        for (HardCopy hardCopy : l) {
+            if(hardCopy.outDate==null||hardCopy.dispatchedTo==null)
+                count++;
+        }
+        pendingNumber.setText(count+"");
+        
         
         DateFormat df=DateFormat.getDateInstance();
         
+        lastUsedList=l;
+        if(l.size()>0)
+            l=l.subList(initindex-1, l.size());
         if(l!=null){
             
             for (HardCopy hardCopy : l) {
@@ -730,7 +802,7 @@ public class FileSearchForm extends javax.swing.JFrame {
                 {
                     continue;
                 }
-                tableModel.setValueAt(index+1, index, 0);
+                tableModel.setValueAt(index+initindex, index, 0);
                 tableModel.setValueAt(df.format(hardCopy.inDate), index, 1);
                 tableModel.setValueAt(hardCopy.fileNo, index, 2);
                 if(hardCopy.subject!=null)
@@ -758,18 +830,16 @@ public class FileSearchForm extends javax.swing.JFrame {
                 index++;
             }
         }
+        if(index<100)
+            nextButton.setEnabled(false);
+        else
+            nextButton.setEnabled(true);
         for (int j = index; j < 100; j++) {
             for (int k = 0; k < 6; k++) {
                     tableModel.setValueAt("", j, k);
             }
         }
-        resultsNumber.setText(String.valueOf(l.size()));
-        int count=0;
-        for (HardCopy hardCopy : l) {
-            if(hardCopy.outDate==null||hardCopy.dispatchedTo==null)
-                count++;
-        }
-        pendingNumber.setText(count+"");
+        
 //        updateRowHeights();
         
         
@@ -813,11 +883,13 @@ public class FileSearchForm extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JButton nextButton;
     private javax.swing.JRadioButton onlyDispatched;
     private javax.swing.JRadioButton onlyPending;
     private javax.swing.JButton openFileButton;
     private com.toedter.calendar.JDateChooser outDateChoose;
     private javax.swing.JTextField pendingNumber;
+    private javax.swing.JButton prevButton;
     private javax.swing.JTextField resultsNumber;
     private javax.swing.JTable resultsTable;
     private javax.swing.JButton searchByDateButton;
@@ -832,6 +904,7 @@ class MultiLineCellRenderer extends JTextArea implements TableCellRenderer {
     setOpaque(true);
   }
 
+  @Override
   public Component getTableCellRendererComponent(JTable table, Object value,
       boolean isSelected, boolean hasFocus, int row, int column) {
     if (isSelected) {
