@@ -195,6 +195,7 @@ public class FileSearchForm extends javax.swing.JFrame {
         jButton1 = new javax.swing.JButton();
         nextButton = new javax.swing.JButton();
         prevButton = new javax.swing.JButton();
+        pageNumberBox = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setFocusable(false);
@@ -436,6 +437,7 @@ public class FileSearchForm extends javax.swing.JFrame {
             }
         });
 
+        nextButton.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
         nextButton.setText("Next");
         nextButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -443,10 +445,19 @@ public class FileSearchForm extends javax.swing.JFrame {
             }
         });
 
+        prevButton.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
         prevButton.setText("Prev");
         prevButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 prevButtonActionPerformed(evt);
+            }
+        });
+
+        pageNumberBox.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        pageNumberBox.setText("1");
+        pageNumberBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                pageNumberBoxActionPerformed(evt);
             }
         });
 
@@ -508,7 +519,9 @@ public class FileSearchForm extends javax.swing.JFrame {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(prevButton, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(37, 37, 37)
+                .addGap(18, 18, 18)
+                .addComponent(pageNumberBox, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(34, 34, 34)
                 .addComponent(nextButton, javax.swing.GroupLayout.PREFERRED_SIZE, 76, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(723, 723, 723))
         );
@@ -568,8 +581,9 @@ public class FileSearchForm extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(nextButton)
-                    .addComponent(prevButton))
-                .addContainerGap(14, Short.MAX_VALUE))
+                    .addComponent(prevButton)
+                    .addComponent(pageNumberBox))
+                .addContainerGap())
         );
 
         pack();
@@ -694,6 +708,7 @@ public class FileSearchForm extends javax.swing.JFrame {
         if(lastUsedList.size()>100*(pagenumber+1)){
             updateGUI(lastUsedList,100*(pagenumber+1)+1);
             pagenumber++;
+            pageNumberBox.setText(pagenumber+1+"");
         }
     }//GEN-LAST:event_nextButtonActionPerformed
 
@@ -703,9 +718,15 @@ public class FileSearchForm extends javax.swing.JFrame {
             return;
         if(pagenumber>0){
             updateGUI(lastUsedList,100*(pagenumber-1)+1);
+            if(pagenumber!=0)
             pagenumber--;
+            pageNumberBox.setText(pagenumber+1+"");
         }
     }//GEN-LAST:event_prevButtonActionPerformed
+
+    private void pageNumberBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pageNumberBoxActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_pageNumberBoxActionPerformed
 
     /**
      * @param args the command line arguments
@@ -888,6 +909,7 @@ public class FileSearchForm extends javax.swing.JFrame {
     private javax.swing.JRadioButton onlyPending;
     private javax.swing.JButton openFileButton;
     private com.toedter.calendar.JDateChooser outDateChoose;
+    private javax.swing.JTextField pageNumberBox;
     private javax.swing.JTextField pendingNumber;
     private javax.swing.JButton prevButton;
     private javax.swing.JTextField resultsNumber;
