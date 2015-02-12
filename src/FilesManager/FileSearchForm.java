@@ -15,6 +15,8 @@ import java.io.File;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
@@ -40,6 +42,7 @@ public class FileSearchForm extends javax.swing.JFrame {
     int lastSearchMade=FILE_SEARCH;
     List<HardCopy> lastUsedList;
     int pagenumber;
+    File openedFile;
     
     /**
      * Creates new form FileSearchForm
@@ -51,7 +54,7 @@ public class FileSearchForm extends javax.swing.JFrame {
         pagenumber=0;
         
         GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
-        this.setExtendedState(this.getExtendedState() | this.MAXIMIZED_BOTH);
+        this.setExtendedState(this.getExtendedState() | FileSearchForm.MAXIMIZED_BOTH);
         buttonGroup1.add(onlyPending);
         buttonGroup1.add(onlyDispatched);
         buttonGroup1.add(bothPndingNDisppatched);
@@ -64,6 +67,7 @@ public class FileSearchForm extends javax.swing.JFrame {
             if(f.exists()){
                 listTemp=ExcelParser.readExcelData(sp.getPath());
                 Search.fileList=listTemp;    
+                openedFile=f;
             }
             else{
                 JOptionPane.showMessageDialog(this, "sorry previous file not found!");
@@ -80,13 +84,14 @@ public class FileSearchForm extends javax.swing.JFrame {
             "Excel files", "xls", "xlsx");
             chooser.setFileFilter(filter);
             int option = chooser.showOpenDialog(FileSearchForm.this);
-
+             
             if(option==JFileChooser.APPROVE_OPTION){
                 File f=chooser.getSelectedFile();
                 System.out.println(f.getName());
                 listTemp=ExcelParser.readExcelData(f.getAbsolutePath());
                 Search.fileList=listTemp;
                 sp.storePath(f.getAbsolutePath());
+                openedFile=f;
             }
             else if(option==JFileChooser.CANCEL_OPTION){
                 setVisible(false);
@@ -157,7 +162,23 @@ public class FileSearchForm extends javax.swing.JFrame {
             }
         });
         
-    }
+        
+        
+        TimerTask task = new FileWatcher( openedFile ) {
+        protected void onChange( File file ) {
+            // here we code the action on a change
+            System.out.println( "File "+ file.getName() +" have change !" );
+            List<HardCopy> l=ExcelParser.readExcelData(file.getAbsolutePath());
+            updateGUI(l, FILE_SEARCH);
+            lastUsedList=l;
+            Search.fileList=l;
+          }
+        };
+
+        Timer timer = new Timer();
+        // repeat the check every second
+        timer.schedule( task , new Date(), 1000 );
+        }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -499,8 +520,7 @@ public class FileSearchForm extends javax.swing.JFrame {
                                     .addGroup(layout.createSequentialGroup()
                                         .addGap(60, 60, 60)
                                         .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 171, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addGap(16, 16, 16)
-                                        .addGap(2, 2, 2)
+                                        .addGap(18, 18, 18)
                                         .addComponent(resultsNumber, javax.swing.GroupLayout.PREFERRED_SIZE, 57, javax.swing.GroupLayout.PREFERRED_SIZE)
                                         .addGap(49, 49, 49)
                                         .addComponent(jLabel7)
@@ -623,11 +643,6 @@ public class FileSearchForm extends javax.swing.JFrame {
         
     }//GEN-LAST:event_fileSearchBoxActionPerformed
 
-    private void inDateChoosePropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_inDateChoosePropertyChange
-        // TODO add your handling code here:
-        
-    }//GEN-LAST:event_inDateChoosePropertyChange
-
     private void searchByDateButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchByDateButtonActionPerformed
         // TODO add your handling code here:
         try {
@@ -666,6 +681,7 @@ public class FileSearchForm extends javax.swing.JFrame {
             Search.fileList=list;
             StoredPath sp=new StoredPath();
             sp.storePath(f.getAbsolutePath());
+            openedFile=f;
         }
         else if(option==JFileChooser.CANCEL_OPTION&&fileNotFound==true){
             this.dispose();
@@ -748,6 +764,11 @@ public class FileSearchForm extends javax.swing.JFrame {
     private void pageNumberBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pageNumberBoxActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_pageNumberBoxActionPerformed
+
+    private void inDateChoosePropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_inDateChoosePropertyChange
+        // TODO add your handling code here:
+
+    }//GEN-LAST:event_inDateChoosePropertyChange
 
     /**
      * @param args the command line arguments
@@ -975,3 +996,29 @@ class MultiLineCellRenderer extends JTextArea implements TableCellRenderer {
 }
 
 
+
+
+/*
+    from
+    http://www.rgagnon.com/javadetails/java-0490.html
+*/
+ abstract class FileWatcher extends TimerTask {
+  private long timeStamp;
+  private File file;
+
+  public FileWatcher( File file ) {
+    this.file = file;
+    this.timeStamp = file.lastModified();
+  }
+
+  public final void run() {
+    long timeStamp = file.lastModified();
+
+    if( this.timeStamp != timeStamp ) {
+      this.timeStamp = timeStamp;
+      onChange(file);
+    }
+  }
+
+  protected abstract void onChange( File file );
+}
