@@ -62,7 +62,7 @@ public class ExcelParser {
             int numberOfSheets = workbook.getNumberOfSheets();
              
             //loop through each of the sheets
-            for(int i=0; i < numberOfSheets; i++){
+            for(int i=0; i < 1; i++){
                  
                 //Get the nth sheet from the workbook
                 Sheet sheet = workbook.getSheetAt(i);
