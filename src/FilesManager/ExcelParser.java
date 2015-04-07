@@ -9,6 +9,8 @@ package FilesManager;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -17,8 +19,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -35,7 +42,8 @@ public class ExcelParser {
      * @param args the command line arguments
      * @throws java.lang.Exception
      */
-    
+    static String filename;
+    static int nrows;
      
     public static void main(String args[]) throws Exception{
 
@@ -45,7 +53,7 @@ public class ExcelParser {
     
     public static List<HardCopy> readExcelData(String fileName) {
         List<HardCopy> fileList = new ArrayList<>();
-        
+        ExcelParser.filename=fileName;
         try {
             //Create the input stream from the xlsx/xls file
             FileInputStream fis = new FileInputStream(fileName);
@@ -66,7 +74,7 @@ public class ExcelParser {
                  
                 //Get the nth sheet from the workbook
                 Sheet sheet = workbook.getSheetAt(i);
-                 
+                nrows=sheet.getPhysicalNumberOfRows();
                 //every sheet has rows, iterate over them
                 Iterator<Row> rowIterator = sheet.iterator();
                 int index=0;
@@ -132,5 +140,150 @@ public class ExcelParser {
             file.key=k++;
         }
         return fileList;
+    }
+    
+    
+    static void samplewrite()
+    {
+           FileInputStream fis = null;
+           try {
+            fis = new FileInputStream(filename);
+            //Create Workbook instance for xlsx/xls file input stream
+            Workbook workbook = null;
+            if(filename.toLowerCase().endsWith("xlsx")){
+                workbook = new XSSFWorkbook(fis);
+            }else if(filename.toLowerCase().endsWith("xls")){
+                workbook = new HSSFWorkbook(fis);
+            } 
+            
+            Sheet sheet=workbook.getSheetAt(0);
+            
+            int n=sheet.getPhysicalNumberOfRows();
+            Row r=sheet.createRow(n);
+            
+            Cell c=r.createCell(0);
+            c.setCellType(Cell.CELL_TYPE_NUMERIC);
+            c.setCellValue(470);
+            
+            CellStyle cellStyle = workbook.createCellStyle();
+            CreationHelper createHelper = workbook.getCreationHelper();
+            
+            cellStyle.setDataFormat(
+                    createHelper.createDataFormat().getFormat("m/d/yy"));
+            
+            c = r.createCell(1);
+            c.setCellValue(new Date());
+            c.setCellStyle(cellStyle);
+            
+            c=r.createCell(2);
+            c.setCellValue("Filename");
+            
+            c=r.createCell(3);
+            c.setCellValue("new subject");
+            
+            c=r.createCell(4);
+            c.setCellValue(new Date());
+            c.setCellStyle(cellStyle);
+            
+            c=r.createCell(5);
+            c.setCellValue("DIsp to");
+            
+            
+            
+            System.out.println("Rows="+n);
+            
+            FileOutputStream output_file =new FileOutputStream(new File(filename));  //Open FileOutputStream to write updates
+                  
+            workbook.write(output_file); //write changes
+                  
+            output_file.close(); 
+
+
+//Read more: http://www.techartifact.com/blogs/2013/10/update-or-edit-existing-excel-files-in-java-using-apache-poi.html#ixzz3Wcn3rnjQ
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(ExcelParser.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(ExcelParser.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                fis.close();
+            } catch (IOException ex) {
+                Logger.getLogger(ExcelParser.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        
+    }
+    
+    static void write_row(HardCopy h)
+    {
+        
+        FileInputStream fis = null;
+           try {
+            fis = new FileInputStream(filename);
+            //Create Workbook instance for xlsx/xls file input stream
+            Workbook workbook = null;
+            if(filename.toLowerCase().endsWith("xlsx")){
+                workbook = new XSSFWorkbook(fis);
+            }else if(filename.toLowerCase().endsWith("xls")){
+                workbook = new HSSFWorkbook(fis);
+            } 
+            
+            CellStyle cellStyle = workbook.createCellStyle();
+            CreationHelper createHelper = workbook.getCreationHelper();
+            
+            cellStyle.setDataFormat(
+                    createHelper.createDataFormat().getFormat("m/d/yy"));
+            
+            Sheet sheet=workbook.getSheetAt(0);
+            
+            int n=sheet.getPhysicalNumberOfRows();
+            Row r=sheet.createRow(n);
+            
+            Cell c=r.createCell(0);
+            c.setCellType(Cell.CELL_TYPE_NUMERIC);
+            c.setCellValue(n);
+            
+            
+            
+            c = r.createCell(1);
+            c.setCellValue(h.inDate);
+            c.setCellStyle(cellStyle);
+            
+            c=r.createCell(2);
+            c.setCellValue(h.fileNo);
+            
+            c=r.createCell(3);
+            c.setCellValue(h.subject);
+            
+            c=r.createCell(4);
+            c.setCellValue(h.outDate);
+            c.setCellStyle(cellStyle);
+            
+            c=r.createCell(5);
+            c.setCellValue(h.dispatchedTo);
+            
+            
+            
+            
+            
+            try (FileOutputStream output_file = new FileOutputStream(new File(filename)) //Open FileOutputStream to write updates
+            ) {
+                workbook.write(output_file); //write changes
+            } //write changes
+            catch(Exception e){
+                JOptionPane.showMessageDialog(null, "Please close the existing file from excel to write changes");
+            }
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(ExcelParser.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(ExcelParser.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                fis.close();
+                JOptionPane.showMessageDialog(null, "succesfully added!");
+            } catch (IOException ex) {
+                Logger.getLogger(ExcelParser.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
     }
 }

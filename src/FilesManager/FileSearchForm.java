@@ -820,7 +820,15 @@ public class FileSearchForm extends javax.swing.JFrame {
 
     private void addFileButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addFileButtonActionPerformed
         // TODO add your handling code here:
-        
+//        HardCopy hardCopy=new HardCopy();
+//        hardCopy.fileNo=fileSearchBox.getEditor().getItem().toString();
+//        hardCopy.subject=subjBox.getText();
+//        hardCopy.inDate=inDateChoose.getDate();
+//        hardCopy.outDate=outDateChoose.getDate();
+//        hardCopy.dispatchedTo="None";
+//        ExcelParser.write_row(hardCopy);
+        insertRowDialog n=new insertRowDialog(this, true);
+        n.setVisible(true);
     }//GEN-LAST:event_addFileButtonActionPerformed
 
     /**
