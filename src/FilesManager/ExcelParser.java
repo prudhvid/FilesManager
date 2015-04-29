@@ -23,12 +23,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
@@ -54,14 +56,20 @@ public class ExcelParser {
     public static List<HardCopy> readExcelData(String fileName) {
         List<HardCopy> fileList = new ArrayList<>();
         ExcelParser.filename=fileName;
+        System.out.println(filename);
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(ExcelParser.class.getName()).log(Level.SEVERE, null, ex);
+        }
         try {
             //Create the input stream from the xlsx/xls file
             FileInputStream fis = new FileInputStream(fileName);
-             
+             System.out.println(filename);
             //Create Workbook instance for xlsx/xls file input stream
             Workbook workbook = null;
             if(fileName.toLowerCase().endsWith("xlsx")){
-                workbook = new XSSFWorkbook(fis);
+                workbook = WorkbookFactory.create(fis);
             }else if(fileName.toLowerCase().endsWith("xls")){
                 workbook = new HSSFWorkbook(fis);
             }
@@ -109,7 +117,8 @@ public class ExcelParser {
                         }
 
                         int s=listStrings.size();
-
+                        
+                        
                         f=new HardCopy(listStrings.get(0),
                                 listStrings.get(1), 
                                 listStrings.get(2), 
@@ -121,7 +130,8 @@ public class ExcelParser {
                     {
                         e.printStackTrace();   
                     }
-                    
+                    if(f.fileNo==null||f.inDate==null||f.subject==null)
+                        continue;
                     fileList.add(f);
                     
                 } //end of rows iterator
@@ -134,9 +144,16 @@ public class ExcelParser {
              
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (InvalidFormatException ex) {
+            Logger.getLogger(ExcelParser.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        catch(Exception e)
+        {
+            System.out.println("exception occured!!");
         }
         int k=1;
         for (HardCopy file : fileList) {
+            
             file.key=k++;
         }
         return fileList;
@@ -151,7 +168,7 @@ public class ExcelParser {
             //Create Workbook instance for xlsx/xls file input stream
             Workbook workbook = null;
             if(filename.toLowerCase().endsWith("xlsx")){
-                workbook = new XSSFWorkbook(fis);
+                workbook = WorkbookFactory.create(fis);
             }else if(filename.toLowerCase().endsWith("xls")){
                 workbook = new HSSFWorkbook(fis);
             } 
@@ -186,23 +203,23 @@ public class ExcelParser {
             c.setCellStyle(cellStyle);
             
             c=r.createCell(5);
-            c.setCellValue("DIsp to");
+            c.setCellValue("Disp to");
             
             
             
             System.out.println("Rows="+n);
             
-            FileOutputStream output_file =new FileOutputStream(new File(filename));  //Open FileOutputStream to write updates
-                  
-            workbook.write(output_file); //write changes
-                  
-            output_file.close(); 
-
-
-//Read more: http://www.techartifact.com/blogs/2013/10/update-or-edit-existing-excel-files-in-java-using-apache-poi.html#ixzz3Wcn3rnjQ
+               try (FileOutputStream output_file = new FileOutputStream(new File(filename)) //Open FileOutputStream to write updates
+               ) {
+                   workbook.write(output_file); //write changes
+                   output_file.close();
+               } //write changes
+               fis.close();
         } catch (FileNotFoundException ex) {
             Logger.getLogger(ExcelParser.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
+            Logger.getLogger(ExcelParser.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InvalidFormatException ex) {
             Logger.getLogger(ExcelParser.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             try {
@@ -255,20 +272,32 @@ public class ExcelParser {
             c=r.createCell(3);
             c.setCellValue(h.subject);
             
-            c=r.createCell(4);
-            c.setCellValue(h.outDate);
-            c.setCellStyle(cellStyle);
+            if(h.outDate!=null)
+            {
+                c=r.createCell(4);
+                c.setCellValue(h.outDate);
+                c.setCellStyle(cellStyle);
+                
+            }
             
-            c=r.createCell(5);
-            c.setCellValue(h.dispatchedTo);
+            if(h.dispatchedTo!=null)
+            {
+                c=r.createCell(5);
+                c.setCellValue(h.dispatchedTo);
+            }
             
             
             
-            
-            
-            try (FileOutputStream output_file = new FileOutputStream(new File(filename)) //Open FileOutputStream to write updates
-            ) {
-                workbook.write(output_file); //write changes
+            fis.close();
+            System.out.println("closed fis!!");
+            FileOutputStream output_file = new FileOutputStream(new File(filename)); //Open FileOutputStream to write updates
+            try{
+                workbook.write(output_file);
+                
+                output_file.flush();//write changes
+                output_file.close();
+                JOptionPane.showMessageDialog(null, "succesfully added!");
+                
             } //write changes
             catch(Exception e){
                 JOptionPane.showMessageDialog(null, "Please close the existing file from excel to write changes");
@@ -277,13 +306,8 @@ public class ExcelParser {
             Logger.getLogger(ExcelParser.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
             Logger.getLogger(ExcelParser.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            try {
-                fis.close();
-                JOptionPane.showMessageDialog(null, "succesfully added!");
-            } catch (IOException ex) {
-                Logger.getLogger(ExcelParser.class.getName()).log(Level.SEVERE, null, ex);
-            }
+        } 
+           finally {
         }
     }
 }
