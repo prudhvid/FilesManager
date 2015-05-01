@@ -15,6 +15,7 @@ import javax.swing.AbstractListModel;
 import javax.swing.ComboBoxEditor;
 import javax.swing.ComboBoxModel;
 import javax.swing.JComboBox;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
 public class FileNoComboSuggest extends AbstractListModel
@@ -26,7 +27,8 @@ public class FileNoComboSuggest extends AbstractListModel
     JComboBox cb;
     ComboBoxEditor cbe;
     int currPos = 0;
-
+    static boolean chosen=false;
+    
     public FileNoComboSuggest(JComboBox jcb)
     {
 
@@ -79,10 +81,15 @@ public class FileNoComboSuggest extends AbstractListModel
     @Override
     public void keyReleased(KeyEvent e)
     {
+        
         String str = cbe.getItem().toString();
         JTextField jtf = (JTextField)cbe.getEditorComponent();
         currPos = jtf.getCaretPosition();
-
+        if(chosen)
+        {
+            chosen=false;
+            return;
+        }
         if(e.getKeyChar() == KeyEvent.CHAR_UNDEFINED)
         {
             if(e.getKeyCode() != KeyEvent.VK_ENTER )
@@ -93,6 +100,13 @@ public class FileNoComboSuggest extends AbstractListModel
         }
         else if(e.getKeyCode() == KeyEvent.VK_ENTER)
         {
+            if(cb.getSelectedIndex()<0)
+            {
+                JOptionPane.showMessageDialog(null, "File not present!");
+                updateModel(cb.getEditor().getItem().toString());
+                chosen=true;
+                return;
+            }
             cb.setSelectedIndex(cb.getSelectedIndex());
             updateModel(cb.getEditor().getItem().toString());
         }

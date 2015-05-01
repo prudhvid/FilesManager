@@ -17,10 +17,20 @@ public class insertRowDialog extends javax.swing.JDialog {
     /**
      * Creates new form insertRowDialog
      */
-    public insertRowDialog(java.awt.Frame parent, boolean modal) {
+    int fileno;
+    String fileString;
+    public insertRowDialog(java.awt.Frame parent, boolean modal,String fileno) {
         super(parent, modal);
         initComponents();
-        snoBox.setText(ExcelParser.nrows+"");
+        try {
+            this.fileno=Integer.parseInt(fileno);
+            this.fileno++;
+        } catch (Exception e) {
+            this.fileno=-1;
+        }
+        
+        snoBox.setText((this.fileno==-1)?"*"+fileno:""+this.fileno);
+        fileString=snoBox.getText();
     }
 
     /**
@@ -208,10 +218,41 @@ public class insertRowDialog extends javax.swing.JDialog {
         c.subject=subjBox.getText();
         c.outDate=outDateChoose.getDate();
         c.inDate=inDateChoose.getDate();
-        ExcelParser.write_row(c);
+        if(ExcelParser.write_row(c))
+        {
+            
+            
+            fileString=snoBox.getText();
+            try{
+                fileno=Integer.parseInt(fileString);
+            }
+            catch(Exception e)
+            {
+                fileno=-1;
+            }
+            clearAll();
+            snoBox.setText(getNextNo());
+        }
+        
         
     }//GEN-LAST:event_addButtonActionPerformed
-
+    private void clearAll()
+    {
+        snoBox.setText("");
+        filenoBox.setText("");
+        subjBox.setText("");
+        outDateChoose.setCalendar(null);
+        inDateChoose.setCalendar(null);
+        dispBox.setText("");
+        
+    }
+    private String getNextNo()
+    {
+        
+        fileno=(fileno==-1)?fileno:fileno+1;
+        fileString= (this.fileno==-1)?"*"+fileString:""+this.fileno;
+        return fileString;
+    }
     /**
      * @param args the command line arguments
      */
@@ -242,7 +283,7 @@ public class insertRowDialog extends javax.swing.JDialog {
         /* Create and display the dialog */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                insertRowDialog dialog = new insertRowDialog(new javax.swing.JFrame(), true);
+                insertRowDialog dialog = new insertRowDialog(new javax.swing.JFrame(), true,"");
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                     @Override
                     public void windowClosing(java.awt.event.WindowEvent e) {
@@ -253,7 +294,7 @@ public class insertRowDialog extends javax.swing.JDialog {
             }
         });
     }
-
+    
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton addButton;
     private javax.swing.JTextField dispBox;

@@ -7,6 +7,8 @@
 package FilesManager;
 
 import java.awt.Component;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
 import java.awt.event.KeyAdapter;
@@ -38,7 +40,7 @@ public class FileSearchForm extends javax.swing.JFrame {
     SubjComboSuggest subSearchHelp;
     TableModel tableModel;
     boolean fileNotFound;
-    final int FILE_SEARCH=1,SUB_SEARCH=2,DATE_SEARCH=3;
+    final int FILE_SEARCH=1,SUB_SEARCH=2,DATE_SEARCH=3,NO_SEARCH=4;
     int lastSearchMade=FILE_SEARCH;
     List<HardCopy> lastUsedList;
     int pagenumber;
@@ -61,6 +63,9 @@ public class FileSearchForm extends javax.swing.JFrame {
         buttonGroup1.add(bothPndingNDisppatched);
         bothPndingNDisppatched.setSelected(true);
         
+//        LoadingDialog ld=new LoadingDialog(this, false);
+//        ld.setVisible(true);
+        
         this.setTitle("MINISTER FOR TRANSPORT AND R&B,GOVT. OF AP");
         
         List<HardCopy> listTemp=null;
@@ -72,8 +77,10 @@ public class FileSearchForm extends javax.swing.JFrame {
                 listTemp=ExcelParser.readExcelData(sp.getPath());
                 Search.fileList=listTemp;    
                 openedFile=f;
+                passwordBox();
             }
             else{
+                passwordBox();
                 JOptionPane.showMessageDialog(this, "sorry previous file not found!");
                 fileNotFound=true;
                 openFileButtonActionPerformed(null);
@@ -82,6 +89,7 @@ public class FileSearchForm extends javax.swing.JFrame {
             
         }
         else{
+            passwordBox();
             JFileChooser chooser = new JFileChooser();
             chooser.setMultiSelectionEnabled(false);
             FileNameExtensionFilter filter = new FileNameExtensionFilter(
@@ -104,7 +112,8 @@ public class FileSearchForm extends javax.swing.JFrame {
             }
         }
        
-        
+//        ld.setVisible(false);
+//        ld.dispose();
         
         lastNumberFound=Search.fileList.get(Search.fileList.size()-1).sno;
         
@@ -120,9 +129,10 @@ public class FileSearchForm extends javax.swing.JFrame {
         resultsTable.getColumnModel().getColumn(3).setMaxWidth(750);
         resultsTable.getColumnModel().getColumn(4).setMaxWidth(200);
         resultsTable.getColumnModel().getColumn(5).setMaxWidth(200);
+        lastSearchMade=NO_SEARCH;
         updateGUI(listTemp,1);
         System.out.println(listTemp);
-        lastSearchMade=SUB_SEARCH;
+        
 //        resizeColumnWidth(resultsTable);
 //        resultsTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
         
@@ -169,6 +179,7 @@ public class FileSearchForm extends javax.swing.JFrame {
         
         
         TimerTask task = new FileWatcher( openedFile ) {
+        @Override
         protected void onChange( File file ) {
             // here we code the action on a change
             System.out.println( "File "+ file.getName() +" have change !" );
@@ -184,9 +195,20 @@ public class FileSearchForm extends javax.swing.JFrame {
 
         Timer timer = new Timer();
         // repeat the check every second
-        timer.schedule( task , new Date(), 1000 );
+        timer.schedule( task , new Date(), 2000 );
         }
 
+    
+    private void passwordBox()
+    {
+        passwordDialog pd=new passwordDialog(this, true);
+        pd.setVisible(true);
+        
+        if(!passwordDialog.validCredentials){
+            System.exit(0);
+        }
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -748,8 +770,16 @@ public class FileSearchForm extends javax.swing.JFrame {
             subjBoxActionPerformed(null);
         else if(lastSearchMade==FILE_SEARCH)
             fileSearchBoxActionPerformed(null);
-        else
+        else if(lastSearchMade==DATE_SEARCH)
             searchByDateButtonActionPerformed(null);
+        else
+        {
+            lastSearchMade=NO_SEARCH;
+            List<HardCopy> l=Search.getBySubject("");
+            if(l.size()>0)
+                updateGUI(l,1);
+            
+        }
     }//GEN-LAST:event_onlyPendingActionPerformed
 
     private void onlyDispatchedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_onlyDispatchedActionPerformed
@@ -757,8 +787,16 @@ public class FileSearchForm extends javax.swing.JFrame {
             subjBoxActionPerformed(null);
         else if(lastSearchMade==FILE_SEARCH)
             fileSearchBoxActionPerformed(null);
-        else
+        else if(lastSearchMade==DATE_SEARCH)
             searchByDateButtonActionPerformed(null);
+        else
+        {
+            lastSearchMade=NO_SEARCH;
+            List<HardCopy> l=Search.getBySubject("");
+            if(l.size()>0)
+                updateGUI(l,1);
+            
+        }
     }//GEN-LAST:event_onlyDispatchedActionPerformed
 
     private void bothPndingNDisppatchedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bothPndingNDisppatchedActionPerformed
@@ -766,8 +804,16 @@ public class FileSearchForm extends javax.swing.JFrame {
             subjBoxActionPerformed(null);
         else if(lastSearchMade==FILE_SEARCH)
             fileSearchBoxActionPerformed(null);
-        else
+        else if(lastSearchMade==DATE_SEARCH)
             searchByDateButtonActionPerformed(null);
+        else
+        {
+            lastSearchMade=NO_SEARCH;
+            List<HardCopy> l=Search.getBySubject("");
+            if(l.size()>0)
+                updateGUI(l,1);
+            
+        }
     }//GEN-LAST:event_bothPndingNDisppatchedActionPerformed
 
     private void nextButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nextButtonActionPerformed
@@ -813,7 +859,11 @@ public class FileSearchForm extends javax.swing.JFrame {
         inDateChoose.setCalendar(null);
         outDateChoose.setCalendar(null);
         fileSearchBox.getEditor().setItem("");
-        subjBoxActionPerformed(null);
+        List<HardCopy> l=Search.getBySubject("");
+        lastSearchMade=NO_SEARCH;
+        if(l.size()>0)
+            updateGUI(l,1);
+        
     }//GEN-LAST:event_refreshButtonActionPerformed
 
     private void addFileButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addFileButtonActionPerformed
@@ -825,7 +875,7 @@ public class FileSearchForm extends javax.swing.JFrame {
 //        hardCopy.outDate=outDateChoose.getDate();
 //        hardCopy.dispatchedTo="None";
 //        ExcelParser.write_row(hardCopy);
-        insertRowDialog n=new insertRowDialog(this, true);
+        insertRowDialog n=new insertRowDialog(this, true,lastNumberFound);
         n.setVisible(true);
     }//GEN-LAST:event_addFileButtonActionPerformed
 
@@ -897,7 +947,15 @@ public class FileSearchForm extends javax.swing.JFrame {
         }
         else
             prevButton.setEnabled(true);
-        resultsNumber.setText(String.valueOf(l.size()));
+        
+        if(lastSearchMade!=NO_SEARCH)
+        {
+//            System.out.println("last made search="+lastSearchMade);
+            resultsNumber.setText(String.valueOf(l.size()));
+        }
+        else
+            resultsNumber.setText("");
+        
         int count=0;
         for (HardCopy hardCopy : l) {
             if(hardCopy.outDate==null||hardCopy.dispatchedTo==null)

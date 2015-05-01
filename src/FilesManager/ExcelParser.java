@@ -231,7 +231,7 @@ public class ExcelParser {
         
     }
     
-    static void write_row(HardCopy h)
+    static boolean write_row(HardCopy h)
     {
         
         FileInputStream fis = null;
@@ -257,8 +257,8 @@ public class ExcelParser {
             Row r=sheet.createRow(n);
             
             Cell c=r.createCell(0);
-            c.setCellType(Cell.CELL_TYPE_NUMERIC);
-            c.setCellValue(n);
+            c.setCellType(Cell.CELL_TYPE_STRING);
+            c.setCellValue(h.sno);
             
             
             
@@ -290,14 +290,15 @@ public class ExcelParser {
             
             fis.close();
             System.out.println("closed fis!!");
-            FileOutputStream output_file = new FileOutputStream(new File(filename)); //Open FileOutputStream to write updates
+             
             try{
+                FileOutputStream output_file = new FileOutputStream(new File(filename));//Open FileOutputStream to write updates
                 workbook.write(output_file);
                 
                 output_file.flush();//write changes
                 output_file.close();
                 JOptionPane.showMessageDialog(null, "succesfully added!");
-                
+                return true;
             } //write changes
             catch(Exception e){
                 JOptionPane.showMessageDialog(null, "Please close the existing file from excel to write changes");
@@ -309,5 +310,7 @@ public class ExcelParser {
         } 
            finally {
         }
+        return false;
     }
+    
 }
