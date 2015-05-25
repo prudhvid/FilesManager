@@ -6,31 +6,30 @@
 
 package FilesManager;
 
+import java.util.List;
 import javax.swing.JOptionPane;
 
 /**
  *
  * @author Prudhvi
  */
-public class insertRowDialog extends javax.swing.JDialog {
+public class UpdateFileDialog extends javax.swing.JDialog {
 
+    
+    FileNoComboSuggest fileComboHelp;
+    
+    
+    
     /**
-     * Creates new form insertRowDialog
+     * Creates new form UpdateFileDialog
      */
-    int fileno;
-    String fileString;
-    public insertRowDialog(java.awt.Frame parent, boolean modal,String fileno) {
+    public UpdateFileDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
-        try {
-            this.fileno=Integer.parseInt(fileno);
-            this.fileno++;
-        } catch (Exception e) {
-            this.fileno=-1;
-        }
+        fileComboHelp=new FileNoComboSuggest(fileSearchBox);
+        fileSearchBox.setModel(fileComboHelp);
+        fileSearchBox.addItemListener(fileComboHelp);
         
-        snoBox.setText((this.fileno==-1)?"*"+fileno:""+this.fileno);
-        fileString=snoBox.getText();
     }
 
     /**
@@ -42,51 +41,30 @@ public class insertRowDialog extends javax.swing.JDialog {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jLabel1 = new javax.swing.JLabel();
-        inDateChoose = new com.toedter.calendar.JDateChooser();
-        jLabel4 = new javax.swing.JLabel();
-        jLabel3 = new javax.swing.JLabel();
-        jLabel2 = new javax.swing.JLabel();
-        outDateChoose = new com.toedter.calendar.JDateChooser();
-        filenoBox = new javax.swing.JTextField();
+        jLabel5 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         subjBox = new javax.swing.JTextArea();
-        jLabel6 = new javax.swing.JLabel();
         dispBox = new javax.swing.JTextField();
-        jLabel5 = new javax.swing.JLabel();
-        jLabel7 = new javax.swing.JLabel();
-        snoBox = new javax.swing.JTextField();
+        jLabel6 = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
+        jLabel1 = new javax.swing.JLabel();
+        inDateChoose = new com.toedter.calendar.JDateChooser();
+        outDateChoose = new com.toedter.calendar.JDateChooser();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
         addButton = new javax.swing.JButton();
+        fileSearchBox = new javax.swing.JComboBox();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
-        jLabel1.setFont(new java.awt.Font("Tahoma", 0, 16)); // NOI18N
-        jLabel1.setText("File No");
-
-        inDateChoose.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
-            public void propertyChange(java.beans.PropertyChangeEvent evt) {
-                inDateChoosePropertyChange(evt);
-            }
-        });
-
-        jLabel4.setFont(new java.awt.Font("Tahoma", 0, 16)); // NOI18N
-        jLabel4.setText("Outward Date");
-
-        jLabel3.setFont(new java.awt.Font("Tahoma", 0, 16)); // NOI18N
-        jLabel3.setText("Inward Date");
-
-        jLabel2.setFont(new java.awt.Font("Tahoma", 0, 16)); // NOI18N
-        jLabel2.setText("Subject");
-
-        filenoBox.setFont(new java.awt.Font("Tahoma", 0, 16)); // NOI18N
+        jLabel5.setFont(new java.awt.Font("Tahoma", 1, 24)); // NOI18N
+        jLabel5.setText("Update Existing File ");
 
         subjBox.setColumns(20);
         subjBox.setFont(new java.awt.Font("Tahoma", 0, 16)); // NOI18N
         subjBox.setRows(5);
+        subjBox.setEnabled(false);
         jScrollPane1.setViewportView(subjBox);
-
-        jLabel6.setFont(new java.awt.Font("Tahoma", 0, 16)); // NOI18N
-        jLabel6.setText("Dispatched To:");
 
         dispBox.setFont(new java.awt.Font("Tahoma", 0, 16)); // NOI18N
         dispBox.addActionListener(new java.awt.event.ActionListener() {
@@ -94,20 +72,59 @@ public class insertRowDialog extends javax.swing.JDialog {
                 dispBoxActionPerformed(evt);
             }
         });
+        dispBox.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                dispBoxFocusGained(evt);
+            }
+        });
 
-        jLabel5.setFont(new java.awt.Font("Tahoma", 1, 24)); // NOI18N
-        jLabel5.setText("Add New File ");
+        jLabel6.setFont(new java.awt.Font("Tahoma", 0, 16)); // NOI18N
+        jLabel6.setText("Dispatched To:");
 
-        jLabel7.setFont(new java.awt.Font("Tahoma", 0, 16)); // NOI18N
-        jLabel7.setText("Sno");
+        jLabel4.setFont(new java.awt.Font("Tahoma", 0, 16)); // NOI18N
+        jLabel4.setText("Outward Date");
 
-        snoBox.setFont(new java.awt.Font("Tahoma", 0, 16)); // NOI18N
+        jLabel1.setFont(new java.awt.Font("Tahoma", 0, 16)); // NOI18N
+        jLabel1.setText("File No");
+
+        inDateChoose.setEnabled(false);
+        inDateChoose.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                inDateChoosePropertyChange(evt);
+            }
+        });
+
+        outDateChoose.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                outDateChooseFocusGained(evt);
+            }
+        });
+
+        jLabel2.setFont(new java.awt.Font("Tahoma", 0, 16)); // NOI18N
+        jLabel2.setText("Subject");
+
+        jLabel3.setFont(new java.awt.Font("Tahoma", 0, 16)); // NOI18N
+        jLabel3.setText("Inward Date");
 
         addButton.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
-        addButton.setText("Add");
+        addButton.setText("Update");
         addButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 addButtonActionPerformed(evt);
+            }
+        });
+
+        fileSearchBox.setEditable(true);
+        fileSearchBox.setFont(new java.awt.Font("Tahoma", 0, 16)); // NOI18N
+        fileSearchBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        fileSearchBox.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                fileSearchBoxItemStateChanged(evt);
+            }
+        });
+        fileSearchBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                fileSearchBoxActionPerformed(evt);
             }
         });
 
@@ -117,14 +134,9 @@ public class insertRowDialog extends javax.swing.JDialog {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(90, 90, 90)
-                .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(51, 51, 51)
-                .addComponent(snoBox, javax.swing.GroupLayout.PREFERRED_SIZE, 205, javax.swing.GroupLayout.PREFERRED_SIZE))
-            .addGroup(layout.createSequentialGroup()
-                .addGap(90, 90, 90)
                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addComponent(filenoBox, javax.swing.GroupLayout.PREFERRED_SIZE, 205, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addComponent(fileSearchBox, javax.swing.GroupLayout.PREFERRED_SIZE, 178, javax.swing.GroupLayout.PREFERRED_SIZE))
             .addGroup(layout.createSequentialGroup()
                 .addGap(89, 89, 89)
                 .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -146,30 +158,23 @@ public class insertRowDialog extends javax.swing.JDialog {
                 .addGap(27, 27, 27)
                 .addComponent(dispBox, javax.swing.GroupLayout.PREFERRED_SIZE, 182, javax.swing.GroupLayout.PREFERRED_SIZE))
             .addGroup(layout.createSequentialGroup()
-                .addGap(363, 363, 363)
-                .addComponent(addButton))
-            .addGroup(layout.createSequentialGroup()
                 .addGap(218, 218, 218)
-                .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 193, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 258, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(addButton)
+                .addGap(305, 305, 305))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(24, 24, 24)
                 .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(73, 73, 73)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(2, 2, 2)
-                        .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(snoBox, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(5, 5, 5)
-                        .addComponent(jLabel1))
-                    .addComponent(filenoBox, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
+                .addGap(35, 35, 35)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel1)
+                    .addComponent(fileSearchBox, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(13, 13, 13)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel2)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -187,72 +192,65 @@ public class insertRowDialog extends javax.swing.JDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(dispBox, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addComponent(addButton))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 62, Short.MAX_VALUE)
+                .addComponent(addButton)
+                .addGap(37, 37, 37))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void inDateChoosePropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_inDateChoosePropertyChange
-        // TODO add your handling code here:
-    }//GEN-LAST:event_inDateChoosePropertyChange
-
     private void dispBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dispBoxActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_dispBoxActionPerformed
 
-    private void addButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addButtonActionPerformed
+    private void inDateChoosePropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_inDateChoosePropertyChange
         // TODO add your handling code here:
-        
-        if("".equals(snoBox.getText()) || inDateChoose.getDate()==null || subjBox.getText().equals("")
-                || filenoBox.getText().equals("") ){
-            JOptionPane.showMessageDialog(null, "Please enter valid values");
+    }//GEN-LAST:event_inDateChoosePropertyChange
+
+    private void addButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addButtonActionPerformed
+        // TODO add your handling code here:        
+        List<HardCopy> l=fileComboHelp.database;
+        if(l.size()!=1)
+        {
+            JOptionPane.showMessageDialog(this, "Please give valid fileNumber");
             return;
         }
-        
-        HardCopy c=new HardCopy();
-        c.dispatchedTo=dispBox.getText();
-        c.sno=snoBox.getText();
-        c.fileNo=filenoBox.getText();
-        c.subject=subjBox.getText();
-        c.outDate=outDateChoose.getDate();
-        c.inDate=inDateChoose.getDate();
-        if(ExcelParser.write_row(c))
+        HardCopy h=l.get(0);
+        h.outDate=outDateChoose.getDate();
+        h.dispatchedTo=dispBox.getText();
+        ExcelParser.update_row(h.rowNum, h);
+    }//GEN-LAST:event_addButtonActionPerformed
+
+    private void fileSearchBoxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_fileSearchBoxItemStateChanged
+        List<HardCopy> l=fileComboHelp.database;
+        if(l.size()==1)
         {
-            
-            
-            fileString=snoBox.getText();
-            try{
-                fileno=Integer.parseInt(fileString);
-            }
-            catch(Exception e)
-            {
-                fileno=-1;
-            }
-            clearAll();
-            snoBox.setText(getNextNo());
+            subjBox.setText(l.get(0).subject);
+            inDateChoose.setDate(l.get(0).inDate);
+        }
+        
+    }//GEN-LAST:event_fileSearchBoxItemStateChanged
+
+    private void fileSearchBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fileSearchBoxActionPerformed
+        List<HardCopy> l=fileComboHelp.database;
+        if(l.size()==1)
+        {
+            subjBox.setText(l.get(0).subject);
+            inDateChoose.setDate(l.get(0).inDate);
         }
         
         
-    }//GEN-LAST:event_addButtonActionPerformed
-    private void clearAll()
-    {
-        snoBox.setText("");
-        filenoBox.setText("");
-        subjBox.setText("");
-        outDateChoose.setCalendar(null);
-        inDateChoose.setCalendar(null);
-        dispBox.setText("");
-        
-    }
-    private String getNextNo()
-    {
-        
-        fileno=(fileno==-1)?fileno:fileno+1;
-        fileString= (this.fileno==-1)?"*"+fileString:""+this.fileno;
-        return fileString;
-    }
+    }//GEN-LAST:event_fileSearchBoxActionPerformed
+
+    private void outDateChooseFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_outDateChooseFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_outDateChooseFocusGained
+
+    private void dispBoxFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_dispBoxFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_dispBoxFocusGained
+
     /**
      * @param args the command line arguments
      */
@@ -270,20 +268,20 @@ public class insertRowDialog extends javax.swing.JDialog {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(insertRowDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(UpdateFileDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(insertRowDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(UpdateFileDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(insertRowDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(UpdateFileDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(insertRowDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(UpdateFileDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
 
         /* Create and display the dialog */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                insertRowDialog dialog = new insertRowDialog(new javax.swing.JFrame(), true,"");
+                UpdateFileDialog dialog = new UpdateFileDialog(new javax.swing.JFrame(), true);
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                     @Override
                     public void windowClosing(java.awt.event.WindowEvent e) {
@@ -294,11 +292,11 @@ public class insertRowDialog extends javax.swing.JDialog {
             }
         });
     }
-    
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton addButton;
     private javax.swing.JTextField dispBox;
-    private javax.swing.JTextField filenoBox;
+    private javax.swing.JComboBox fileSearchBox;
     private com.toedter.calendar.JDateChooser inDateChoose;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
@@ -306,10 +304,8 @@ public class insertRowDialog extends javax.swing.JDialog {
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
-    private javax.swing.JLabel jLabel7;
     private javax.swing.JScrollPane jScrollPane1;
     private com.toedter.calendar.JDateChooser outDateChoose;
-    private javax.swing.JTextField snoBox;
     private javax.swing.JTextArea subjBox;
     // End of variables declaration//GEN-END:variables
 }

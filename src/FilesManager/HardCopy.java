@@ -15,6 +15,7 @@ import org.apache.poi.ss.usermodel.Cell;
 
 public class HardCopy {
     public int key;
+    public int rowNum;
     public String sno;
     public Date inDate,outDate;
     public String fileNo,subject,dispatchedTo;
@@ -23,11 +24,11 @@ public class HardCopy {
         inDate=outDate=null;
         fileNo=subject=dispatchedTo=null;
     }
-    public  HardCopy(String ssno,String ind,String fileno,String sub,String outd,String dispatch)
+    public  HardCopy(int rowno,String ssno,String ind,String fileno,String sub,String outd,String dispatch)
     {
         
         sno=ssno.replaceFirst("\\.0", "");
-        
+        rowNum=rowno;
         
         fileNo=fileno.toUpperCase();
         subject=sub.toUpperCase();
@@ -191,7 +192,8 @@ public class HardCopy {
             if(outDate!=null)
                 res+=outDate.toString()+"\t";
             if(dispatchedTo!=null)
-                res+=dispatchedTo+"\n";    
+                res+=dispatchedTo+"\n";  
+            res+=rowNum+"\n";
         }
         
         catch(Exception e)

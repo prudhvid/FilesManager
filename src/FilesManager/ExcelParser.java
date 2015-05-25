@@ -85,11 +85,11 @@ public class ExcelParser {
                 nrows=sheet.getPhysicalNumberOfRows();
                 //every sheet has rows, iterate over them
                 Iterator<Row> rowIterator = sheet.iterator();
-                int index=0;
+                int rownumber=0;
                 while (rowIterator.hasNext()) 
                 {
-                    index++;
-                    if(index==1)
+                    rownumber++;
+                    if(rownumber==1)
                     {
 
                         rowIterator.next();
@@ -107,7 +107,7 @@ public class ExcelParser {
                     try{
                         
                         List<String> listStrings=new LinkedList<>();
-
+                                
                         for (int j = 0; j < 6; j++) {
                             Cell c=row.getCell(j);
                             if(c!=null)
@@ -119,7 +119,7 @@ public class ExcelParser {
                         int s=listStrings.size();
                         
                         
-                        f=new HardCopy(listStrings.get(0),
+                        f=new HardCopy(rownumber,listStrings.get(0),
                                 listStrings.get(1), 
                                 listStrings.get(2), 
                                 listStrings.get(3), 
@@ -137,8 +137,7 @@ public class ExcelParser {
                 } //end of rows iterator
 
                  
-            } //end of sheets for loop
-             
+            }             
             //close file input stream
             fis.close();
              
@@ -249,7 +248,7 @@ public class ExcelParser {
             CreationHelper createHelper = workbook.getCreationHelper();
             
             cellStyle.setDataFormat(
-                    createHelper.createDataFormat().getFormat("m/d/yy"));
+                    createHelper.createDataFormat().getFormat("dd/mm/yy"));
             
             Sheet sheet=workbook.getSheetAt(0);
             
@@ -313,4 +312,62 @@ public class ExcelParser {
         return false;
     }
     
+    static boolean update_row(int rownum,HardCopy h)
+    {
+        FileInputStream fis = null;
+           try {
+            fis = new FileInputStream(filename);
+            //Create Workbook instance for xlsx/xls file input stream
+            Workbook workbook = null;
+            if(filename.toLowerCase().endsWith("xlsx")){
+                workbook = new XSSFWorkbook(fis);
+            }else if(filename.toLowerCase().endsWith("xls")){
+                workbook = new HSSFWorkbook(fis);
+            } 
+            
+            CellStyle cellStyle = workbook.createCellStyle();
+            CreationHelper createHelper = workbook.getCreationHelper();
+            
+            cellStyle.setDataFormat(
+                    createHelper.createDataFormat().getFormat("dd/mm/yy"));
+            
+            Sheet sheet=workbook.getSheetAt(0);
+            
+            
+            Row r=sheet.getRow(rownum);
+            
+            Cell c=r.getCell(4);
+            c.setCellValue(h.outDate);
+            c.setCellStyle(cellStyle);
+            c=r.getCell(5);
+            c.setCellValue(h.dispatchedTo);
+            
+            
+            
+            
+            fis.close();
+            System.out.println("closed fis!!");
+             
+            try{
+                FileOutputStream output_file = new FileOutputStream(new File(filename));//Open FileOutputStream to write updates
+                workbook.write(output_file);
+                
+                output_file.flush();//write changes
+                output_file.close();
+                JOptionPane.showMessageDialog(null, "succesfully added!");
+                return true;
+            } //write changes
+            catch(Exception e){
+                JOptionPane.showMessageDialog(null, "Please close the existing file from excel to write changes");
+            }
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(ExcelParser.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(ExcelParser.class.getName()).log(Level.SEVERE, null, ex);
+        } 
+           finally {
+        }
+        return false;
+        
+    }
 }
